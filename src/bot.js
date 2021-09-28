@@ -1,35 +1,38 @@
-const DynamoService = require('../lib/DynamoService');
+const Collaborative = require('../lib/collaborative');
 const Api = require('../lib/api');
 
 module.exports = class Bot {
     static hook(req, res) {
-        // se for uma mensagem de zengoldabil
-        if(req.body.message && req.body.message.text == '/zengoldabil') {
-            var payload = Object.assign({}, req.body.message.chat);
-            payload.id = payload.id.toString();
-            payload.createdAt = (new Date()).toISOString();
-            DynamoService.insert(payload)
-            .then(function(result) {
-                Bot.sendBroadCastMessage(`Novo subscrito no canal de notificações: ${req.body.message.chat.first_name}`)
-                .then(function() {
+        if(req.body.message && req.body.message.text) {
+            const messagetext = req.body.message.text;
+            if(messagetext.toUpperCase().indexOf('DEF') !== -1 || messagetext.toUpperCase().indexOf('PAR') !== -1) {
+                var payload = Object.assign({}, req.body.message.chat);
+                payload.id = payload.id.toString();
+                Collaborative.insert(payload)
+                .then(function(result) {
+                    console.log(result);
                     res.status(200).send({});
+                    // Bot.sendBroadCastMessage(`Novo subscrito no canal de notificações: ${req.body.message.chat.first_name}`)
+                    // .then(function() {
+                    //     res.status(200).send({});
+                    // })
+                    // .catch(function() {
+                    //     res.status(200).send({});
+                    // });
                 })
-                .catch(function() {
+                .catch(function(err) {
+                    console.log('ERROR RETURNED', err);
                     res.status(200).send({});
                 });
-            })
-            .catch(function(err) {
-                console.log('ERROR RETURNED', err);
-                res.status(200).send({});
-            });
-        } else {
-            Bot.sendBroadCastMessage('Olá, você já está ativo nas nossas notificações.')
-            .then(function() {
-                res.status(200).send({});
-            })
-            .catch(function() {
-                res.status(200).send({});
-            });
+            } else {
+                Api.postByBody(
+                process.env.TELEGRAMBOT_URI,
+                '/sendMessage',
+                {
+                    chat_id: req.body.message.chat.id,
+                    text: 'Olá, eu ainda não te conheço, por favor digite a sua chave do AppCollaborative.'
+                });
+            }
         }
     }
 
@@ -58,7 +61,7 @@ module.exports = class Bot {
                         if(['appstatus', 'fiscalstatus', 'deliverystatus', 'healthcheckstock'].indexOf(chats.itens[i].id) === -1) {
                             promisses.push(
                                 Api.postByBody(
-                                process.env.TELEGRAM_URI,
+                                process.env.TELEGRAMBOT_URI,
                                 '/sendMessage',
                                 {
                                     chat_id: chats.itens[i].id,

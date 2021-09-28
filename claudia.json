@@ -1,0 +1,10 @@
+{
+  "lambda": {
+    "role": "telegramappcollaborativebot-executor",
+    "name": "telegramappcollaborativebot",
+    "region": "us-east-1"
+  },
+  "api": {
+    "id": "3igb9ocvzj"
+  }
+}
