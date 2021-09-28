@@ -3,37 +3,53 @@ const Api = require('../lib/api');
 
 module.exports = class Bot {
     static hook(req, res) {
+        console.log('START');
+        console.log(res.body);
         if(req.body.message && req.body.message.text) {
             const messagetext = req.body.message.text;
+            console.log('TEXT');
+            console.log(messagetext);
             if(messagetext.toUpperCase().indexOf('DEF') !== -1 || messagetext.toUpperCase().indexOf('PAR') !== -1) {
-                var payload = Object.assign({}, req.body.message.chat);
-                payload.id = payload.id.toString();
+                console.log('ENTROU');
+                var payload = Object.assign({}, req.body.message);
                 Collaborative.insert(payload)
                 .then(function(result) {
-                    console.log(result);
-                    res.status(200).send({});
-                    // Bot.sendBroadCastMessage(`Novo subscrito no canal de notificações: ${req.body.message.chat.first_name}`)
-                    // .then(function() {
-                    //     res.status(200).send({});
-                    // })
-                    // .catch(function() {
-                    //     res.status(200).send({});
-                    // });
+                    console.log(result, typeof result);
+                    const datares = (typeof result == 'string') ? JSON.parse(result) : result;
+                    if(datares.data && datares.data.id) {
+                        Bot.sendMessage(
+                            datares.data.telegram_id,
+                            `Olá ${datares.data.data.first_name}, agora você está inscrito para as notificações da loja ${datares.data.environment.name}!`
+                        ).then(function() {
+                            res.status(200).send({});
+                        });
+                    }
                 })
                 .catch(function(err) {
                     console.log('ERROR RETURNED', err);
                     res.status(200).send({});
                 });
             } else {
-                Api.postByBody(
-                process.env.TELEGRAMBOT_URI,
-                '/sendMessage',
-                {
-                    chat_id: req.body.message.chat.id,
-                    text: 'Olá, eu ainda não te conheço, por favor digite a sua chave do AppCollaborative.'
+                console.log('ENVIOU MENSAGEM DE NAO SEI');
+                //buscar pelo telegram id se o usuario existe.
+                Bot.sendMessage(
+                    req.body.message.chat.id,
+                    'Olá, eu ainda não te conheço, por favor digite a sua chave do AppCollaborative.'
+                ).then(function(result) {
+                    res.status(200).send({});
                 });
             }
         }
+    }
+
+    static sendMessage(chat_id, message) {
+        return Api.postByBody(
+        process.env.TELEGRAMBOT_URI,
+        '/sendMessage',
+        {
+            chat_id: chat_id,
+            text: message
+        });
     }
 
     static notify(req, res) {
