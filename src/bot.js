@@ -115,7 +115,7 @@ module.exports = class Bot {
             }
         })
         .catch(function(err) {
-            sendServerFailMessage(req)
+            Bot.sendServerFailMessage(req)
             .then(function(result) {res.status(200).send({})})
             .catch(function(result) {res.status(200).send({})});
         });
