@@ -37,6 +37,8 @@ module.exports = class Notify {
 
     static textByNotification(notification) {
         let text = '';
+        let link = '';
+        let content = '';
         if (notification.title) {
             text += notification.title;
         }
@@ -44,19 +46,24 @@ module.exports = class Notify {
             let paras = notification.text.split('<a');
             let parbs = paras[1].split('</a>');
             let parcs = parbs[0].split('>');
-            let content = parcs[1];
+            content = parcs[1];
             let parts = notification.text.split('href="');
             let paramdirt = (parts[1]) ? parts[1].split('"') : [''];
-            let link = (paramdirt[0] !== '') ? ` [${content}](${paramdirt[0]}) ` : '';
-            text += link;
+            link = (paramdirt[0] !== '') ? ` [${content}](${paramdirt[0]}) ` : '';
         }
         if (notification.text) {
             let htmlString= notification.text;
             let stripedHtml = htmlString.replace(/<[^>]+>/g, ' ');
-            text += stripedHtml;
+            text += ', ' + stripedHtml;
+        }
+        if (content !== '') {
+            text = text.replace(content, '');
         }
         if (text.indexOf('-') !== -1) {
             text = text.replace(/-/g, '\\-');
+        }
+        if (link !== '') {
+            text += link;
         }
         return text;
     }
