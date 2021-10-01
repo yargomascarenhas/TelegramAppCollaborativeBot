@@ -62,6 +62,9 @@ module.exports = class Notify {
         if (text.indexOf('-') !== -1) {
             text = text.replace(/-/g, '\\-');
         }
+        if (text.indexOf('.') !== -1) {
+            text = text.replace('.', '\\.');
+        }
         if (link !== '') {
             text += link;
         }
