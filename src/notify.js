@@ -9,7 +9,7 @@ module.exports = class Notify {
             if(result.data && result.data[0]) {
                 let promises = [];
                 for(let recipient of result.data) {
-                    promises.push(Bot.sendMessage(
+                    promises.push(Bot.sendMessageMarkdown(
                         recipient.telegram_id,
                         text
                     ));
@@ -40,10 +40,23 @@ module.exports = class Notify {
         if (notification.title) {
             text += notification.title;
         }
+        if (notification.text && notification.text.indexOf('href="') !== -1) {
+            let paras = notification.text.split('<a');
+            let parbs = paras[1].split('</a>');
+            let parcs = parbs[0].split('>');
+            let content = parcs[1];
+            let parts = notification.text.split('href="');
+            let paramdirt = (parts[1]) ? parts[1].split('"') : [''];
+            let link = (paramdirt[0] !== '') ? ` [${content}](${paramdirt[0]}) ` : '';
+            text += link;
+        }
         if (notification.text) {
-            var htmlString= notification.text;
-            var stripedHtml = htmlString.replace(/<[^>]+>/g, ' ');
+            let htmlString= notification.text;
+            let stripedHtml = htmlString.replace(/<[^>]+>/g, ' ');
             text += stripedHtml;
+        }
+        if (text.indexOf('-') !== -1) {
+            text = text.replace(/-/g, '\\-');
         }
         return text;
     }

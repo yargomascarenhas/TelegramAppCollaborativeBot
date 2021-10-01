@@ -31,6 +31,31 @@ module.exports = class Bot {
         });
     }
 
+    static sendMessageMarkdown(chat_id, message) {
+        return new Promise(function(resolve, reject) {
+            console.log('STARTING sendMessageHtml');
+            console.log(message);
+            console.log(chat_id);
+            Api.postByBody(
+                process.env.TELEGRAMBOT_URI,
+                '/sendMessage',
+            {
+                chat_id: chat_id,
+                text: message,
+                parse_mode: 'MarkdownV2',
+                disable_web_page_preview: true
+            })
+            .then(function(result) {
+                console.log('RESULT', result);
+                resolve(result);
+            })
+            .catch(function(error) {
+                console.log('ERROR', error);
+                reject(error);
+            });
+        });
+    }
+
     static isAKey(req) {
         const messagetext = req.body.message.text;
         return (messagetext.toUpperCase().indexOf('DEF') !== -1
