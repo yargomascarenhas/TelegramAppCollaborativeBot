@@ -42,14 +42,14 @@ module.exports = class Notify {
         if (notification.title) {
             text += notification.title;
         }
-        if (notification.text && notification.text.indexOf('href="') !== -1) {
+        if (notification.text && notification.text.indexOf('href=') !== -1) {
             let paras = notification.text.split('<a');
             let parbs = paras[1].split('</a>');
             let parcs = parbs[0].split('>');
             content = parcs[1];
-            let parts = notification.text.split('href="');
-            let paramdirt = (parts[1]) ? parts[1].split('"') : [''];
-            link = (paramdirt[0] !== '') ? ` [${content}](${paramdirt[0]}) ` : '';
+            let parts = notification.text.split('href=');
+            let paramdirt = (parts[1].indexOf('"') !== -1) ? parts[1].split('"') : parts[1].split('\'');
+            link = (paramdirt[1] !== '') ? ` [${content}](${paramdirt[1]}) ` : '';
         }
         if (notification.text) {
             let htmlString= notification.text;
@@ -63,7 +63,7 @@ module.exports = class Notify {
             text = text.replace(/-/g, '\\-');
         }
         if (text.indexOf('.') !== -1) {
-            text = text.replace('.', '\\.');
+            text = text.replace(/\./g, '\\.');
         }
         if (link !== '') {
             text += link;
