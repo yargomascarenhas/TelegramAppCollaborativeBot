@@ -9,16 +9,47 @@ module.exports = class Notify {
             if(result.data && result.data[0]) {
                 let promises = [];
                 for(let recipient of result.data) {
-                    promises.push(Bot.sendMessageMarkdown(
-                        recipient.telegram_id,
-                        text
-                    ));
+                    if(Notify.userMayReceiveThisMessage(recipient, req.body)) {
+                        promises.push(Bot.sendMessageMarkdown(
+                            recipient.telegram_id,
+                            text
+                        ));
+                    }
                 }
                 Promise.all(promises)
                 .then(s => res.status(200).send({}))
                 .catch(e => console.log(e));
             }
         });
+    }
+
+    static userMayReceiveThisMessage(user, notification) {
+        let preferences = {
+          SOLICITACAOFINALIZADA: false,
+          ORDEMCOMPRA: false,
+          ECOMMERCEPEDIDO: false,
+          VENDAPAGA: false,
+          EXTRATOFECHADO: false,
+          ECOMMERCENOVOCLIENTE: false,
+          ESTOQUEESGOTADO: false,
+          ANIVERSARIANTE: false,
+        }
+        let setpref = [];
+
+        if(user.preferences) {
+          preferences = user.preferences;
+        } else {
+          if (user.type === 'DEFAULT') {
+              setpref = ['SOLICITACAOFINALIZADA', 'ECOMMERCEPEDIDO', 'VENDAPAGA', 'ECOMMERCENOVOCLIENTE', 'ANIVERSARIANTE'];
+          }
+          if (user.type === 'PARTNER') {
+              setpref = ['ORDEMCOMPRA', 'ESTOQUEESGOTADO', 'EXTRATOFECHADO'];
+          }
+          for(let rule of setpref) {
+            preferences[rule] = true;
+          }
+        }
+        return preferences[notification.rule];
     }
 
     static queryRecipientsByNotification(notification) {
