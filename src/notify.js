@@ -9,7 +9,7 @@ module.exports = class Notify {
             if(result.data && result.data[0]) {
                 let promises = [];
                 for(let recipient of result.data) {
-                    if(Notify.userMayReceiveThisMessage(recipient, req.body)) {
+                    if(Notify.userMayReceiveThisMessage(recipient.user, req.body)) {
                         promises.push(Bot.sendMessageMarkdown(
                             recipient.telegram_id,
                             text
@@ -95,12 +95,6 @@ module.exports = class Notify {
         }
         if (text.indexOf('.') !== -1) {
             text = text.replace(/\./g, '\\.');
-        }
-        if (text.indexOf('(') !== -1) {
-            text = text.replace(/\(/g, '\\(');
-        }
-        if (text.indexOf(')') !== -1) {
-            text = text.replace(/\)/g, '\\)');
         }
         if (link !== '') {
             text += link;
