@@ -58,8 +58,9 @@ module.exports = class Bot {
 
     static isAKey(req) {
         const messagetext = req.body.message.text;
-        return (messagetext.toUpperCase().indexOf('DEF') !== -1
-            || messagetext.toUpperCase().indexOf('PAR') !== -1);
+        return ((messagetext.toUpperCase().indexOf('DEF') !== -1
+            || messagetext.toUpperCase().indexOf('PAR') !== -1)
+            && messagetext.length === 11);
     }
 
     static haveMessageText(req) {
@@ -72,6 +73,11 @@ module.exports = class Bot {
         .then(function(datares) {
             if(datares.data && datares.data.id) {
                 Bot.sendRegisterMessage(datares.data)
+                .then(function() {res.status(200).send({})})
+                .catch(function() {res.status(200).send({})});
+            } else if(datares.error && datares.error.message && datares.error.message == 'TELEGRAM_IN_USE_KEY') {
+                Bot.sendMessage(req.body.message.chat.id,
+                    'Sua conta telegram já está vinculada a uma chave, não é possível vincular uma nova chave a este telegram')
                 .then(function() {res.status(200).send({})})
                 .catch(function() {res.status(200).send({})});
             } else {
