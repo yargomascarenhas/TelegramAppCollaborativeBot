@@ -515,14 +515,31 @@ module.exports = class Bot {
             `&${paramq}=${mes}` : `?${paramq}=${mes}`;
     }
 
-    static processaConsulta(datares, chat_id, query) {
+    static processaConsultaQuantidadeVenda(datares, chat_id, query) {
         return new Promise(function(resolve, reject) {
-            console.log('processaConsulta');
+            console.log('processaConsultaQuantidadeVenda');
             console.log(datares, chat_id, query);
             Bot.consulta(chat_id, query)
             .then(function(result) {
                 console.log(result);
-                resolve(result);
+                let amount = 0;
+                let open = 0;
+                let closed = 0;
+                if(result.data) {
+                    for(let item of result.data) {
+                        amount += parseFloat(item.amount);
+                        if(item.status == 'ABE') {
+                            open += parseFloat(item.amount);
+                        } else if(item.status == 'BAI') {
+                            closed += parseFloat(item.amount);
+                        }
+                    }
+                    Bot.sendMessage(
+                        chat_id,
+                        `Foram feitas um total de ${result._links.count} vendas, que totalizam ${amount.toFixed(2)} reais. Sendo um total de ${open.toFixed(2)} reais em aberto, e ${closed.toFixed(2)} reais de vendas pagas.`
+                    ).then(res => resolve(res))
+                    .catch(err => resolve(err));
+                }
             })
             .catch(function(err) {
                 console.log(err);
@@ -531,7 +548,7 @@ module.exports = class Bot {
         });
     }
 
-    static consultaPeriodo(datares, chat_id, messagetext, query) {
+    static consultaPeriodo(datares, chat_id, messagetext, query, tocall) {
         if(Bot.msgContains(messagetext, 'MÊS') ||
             Bot.msgContains(messagetext, 'MES')) {
             if(Bot.msgContains(messagetext, 'ESTE MÊS') ||
@@ -544,7 +561,7 @@ module.exports = class Bot {
                     query += (Bot.msgContains(query, '?')) ?
                         '&month=CURRENT' : '?month=CURRENT';
                     query += '&year=CURRENT'
-                    return Bot.processaConsulta(datares, chat_id, query);
+                    return tocall(datares, chat_id, query);
             }
             if(Bot.msgContains(messagetext, 'NO MÊS DE') ||
                 Bot.msgContains(messagetext, 'NO MES DE') ||
@@ -555,22 +572,22 @@ module.exports = class Bot {
                     if(Bot.msgContains(messagetext, 'MÊS DE')) {
                         query += Bot.getParamsToQuey(messagetext, query, 'month', 'MÊS DE ', 'ESSE ANO', 'ESSE', 'ESTE');
                         query += '&year=CURRENT'
-                        return Bot.processaConsulta(datares, chat_id, query);
+                        return tocall(datares, chat_id, query);
                     }
                     if(Bot.msgContains(messagetext, 'MES DE')) {
                         query += Bot.getParamsToQuey(messagetext, query, 'month', 'MES DE ', 'ESSE ANO', 'ESSE', 'ESTE');
                         query += '&year=CURRENT'
-                        return Bot.processaConsulta(datares, chat_id, query);
+                        return tocall(datares, chat_id, query);
                     }
                     if(Bot.msgContains(messagetext, 'NO MES')) {
                         query += Bot.getParamsToQuey(messagetext, query, 'month', 'NO MES ', 'ESSE ANO', 'ESSE', 'ESTE');
                         query += '&year=CURRENT'
-                        return Bot.processaConsulta(datares, chat_id, query);
+                        return tocall(datares, chat_id, query);
                     }
                     if(Bot.msgContains(messagetext, 'NO MÊS')) {
                         query += Bot.getParamsToQuey(messagetext, query, 'month', 'NO MÊS ', 'ESSE ANO', 'ESSE', 'ESTE');
                         query += '&year=CURRENT'
-                        return Bot.processaConsulta(datares, chat_id, query);
+                        return tocall(datares, chat_id, query);
                     }
                 }
                 if(Bot.msgContains(messagetext, 'NO ANO DE') ||
@@ -580,22 +597,22 @@ module.exports = class Bot {
                     if(Bot.msgContains(messagetext, 'MÊS DE')) {
                         query += Bot.getParamsToQuey(messagetext, query, 'month', 'MÊS DE ', 'NO ANO', 'NO ANO', 'ANO');
                         query += '&year=CURRENT'
-                        return Bot.processaConsulta(datares, chat_id, query);
+                        return tocall(datares, chat_id, query);
                     }
                     if(Bot.msgContains(messagetext, 'MES DE')) {
                         query += Bot.getParamsToQuey(messagetext, query, 'month', 'MES DE ', 'NO ANO', 'NO ANO', 'ANO');
                         query += '&year=CURRENT'
-                        return Bot.processaConsulta(datares, chat_id, query);
+                        return tocall(datares, chat_id, query);
                     }
                     if(Bot.msgContains(messagetext, 'NO MES')) {
                         query += Bot.getParamsToQuey(messagetext, query, 'month', 'NO MES ', 'NO ANO', 'NO ANO', 'ANO');
                         query += '&year=CURRENT'
-                        return Bot.processaConsulta(datares, chat_id, query);
+                        return tocall(datares, chat_id, query);
                     }
                     if(Bot.msgContains(messagetext, 'NO MÊS')) {
                         query += Bot.getParamsToQuey(messagetext, query, 'month', 'NO MÊS ', 'NO ANO', 'NO ANO', 'ANO');
                         query += '&year=CURRENT'
-                        return Bot.processaConsulta(datares, chat_id, query);
+                        return tocall(datares, chat_id, query);
                     }
                 }
             }
@@ -603,6 +620,7 @@ module.exports = class Bot {
         }
         if(Bot.msgContains(messagetext, 'HOJE')) {
             query += '&contability_date=today';
+            return tocall(datares, chat_id, query);
         }
         if(Bot.msgContains(messagetext, 'DIA')) {
             if(Bot.msgContains(messagetext, 'ESTE MÊS') ||
@@ -640,22 +658,52 @@ module.exports = class Bot {
         if(Bot.isDefault(datares)) {
             if(Bot.msgContains(messagetext, 'VENDA')) {
                 if(Bot.msgContains(messagetext, 'LOJA')) {
-                    return Bot.consultaPeriodo(datares, chat_id, messagetext, 'sales?user_name=!ECOMMERCE');
+                    return Bot.consultaPeriodo(
+                        datares,
+                        chat_id,
+                        messagetext,
+                        'sales?user_name=!ECOMMERCE',
+                        Bot.processaConsultaQuantidadeVenda
+                    );
                 }
                 if(Bot.msgContains(messagetext, 'ECOMMERCE') ||
                     Bot.msgContains(messagetext, 'E-COMMERCE') ||
                     Bot.msgContains(messagetext, 'SITE')) {
-                    return Bot.consultaPeriodo(datares, chat_id, messagetext, 'sales?user_name=ECOMMERCE');
+                    return Bot.consultaPeriodo(
+                        datares,
+                        chat_id,
+                        messagetext,
+                        'sales?user_name=ECOMMERCE',
+                        Bot.processaConsultaQuantidadeVenda
+                    );
                 }
                 if(Bot.msgContains(messagetext, 'EU FIZ')) {
-                    return Bot.consultaPeriodo(datares, chat_id, messagetext, `sales?user_id=${datares.data.user.id}`);
+                    return Bot.consultaPeriodo(
+                        datares,
+                        chat_id,
+                        messagetext,
+                        `sales?user_id=${datares.data.user.id}`,
+                        Bot.processaConsultaQuantidadeVenda
+                    );
                 }
-                return Bot.consultaPeriodo(datares, chat_id, messagetext, 'sales');
+                return Bot.consultaPeriodo(
+                    datares,
+                    chat_id,
+                    messagetext,
+                    'sales',
+                    Bot.processaConsultaQuantidadeVenda
+                );
             }
         }
         if(Bot.isPartner(datares)) {
             if(Bot.msgContains(messagetext, 'VENDA')) {
-                return Bot.consultaPeriodo(datares, chat_id, messagetext, 'sales');
+                return Bot.consultaPeriodo(
+                    datares,
+                    chat_id,
+                    messagetext,
+                    'sales',
+                    Bot.processaConsultaQuantidadeVenda
+                );
             }
         }
 
