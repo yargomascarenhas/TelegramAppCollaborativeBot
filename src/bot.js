@@ -506,13 +506,21 @@ module.exports = class Bot {
         }
     }
 
-    static getParamsToQuey(messagetext, query, paramq, startin, endin, possba, possbb) {
-        let mesp = messagetext.split(startin);
+    static getParamsMesToQuery(messagetext, query, paramq, startin, endin, possba, possbb) {
+        let mesp = messagetext.toUpperCase().split(startin);
         let part = (Bot.msgContains(messagetext, endin))
             ? mesp[1].split(possba) : mesp[1].split(possbb);
-        let mes = Bot.getMesByString(part[0]);
+        let mes = Bot.getMesByString(part[0].trim());
         return (Bot.msgContains(query, '?')) ?
             `&${paramq}=${mes}` : `?${paramq}=${mes}`;
+    }
+
+    static getParamsAnoToQuery(messagetext, query) {
+        let mesp = (Bot.msgContains(messagetext, 'ANO DE '))
+            ? messagetext.toUpperCase().split('ANO DE') : messagetext.toUpperCase().split('ANO ');
+        let year = mesp[1].trim();
+        query += `&year=${year}`;
+        return query;
     }
 
     static processaConsultaQuantidadeVenda(datares, chat_id, query) {
@@ -560,7 +568,7 @@ module.exports = class Bot {
                 Bot.msgContains(messagetext, 'MÊS CORRENTE')) {
                     query += (Bot.msgContains(query, '?')) ?
                         '&month=CURRENT' : '?month=CURRENT';
-                    query += '&year=CURRENT'
+                    query += '&year=CURRENT&per_page=999'
                     return tocall(datares, chat_id, query);
             }
             if(Bot.msgContains(messagetext, 'NO MÊS DE') ||
@@ -570,23 +578,23 @@ module.exports = class Bot {
                 if(Bot.msgContains(messagetext, 'ESTE ANO') ||
                     Bot.msgContains(messagetext, 'ESSE ANO')) {
                     if(Bot.msgContains(messagetext, 'MÊS DE')) {
-                        query += Bot.getParamsToQuey(messagetext, query, 'month', 'MÊS DE ', 'ESSE ANO', 'ESSE', 'ESTE');
-                        query += '&year=CURRENT'
+                        query += Bot.getParamsMesToQuery(messagetext, query, 'month', 'MÊS DE ', 'ESSE ANO', 'ESSE', 'ESTE');
+                        query += '&year=CURRENT&per_page=999'
                         return tocall(datares, chat_id, query);
                     }
                     if(Bot.msgContains(messagetext, 'MES DE')) {
-                        query += Bot.getParamsToQuey(messagetext, query, 'month', 'MES DE ', 'ESSE ANO', 'ESSE', 'ESTE');
-                        query += '&year=CURRENT'
+                        query += Bot.getParamsMesToQuery(messagetext, query, 'month', 'MES DE ', 'ESSE ANO', 'ESSE', 'ESTE');
+                        query += '&year=CURRENT&per_page=999'
                         return tocall(datares, chat_id, query);
                     }
                     if(Bot.msgContains(messagetext, 'NO MES')) {
-                        query += Bot.getParamsToQuey(messagetext, query, 'month', 'NO MES ', 'ESSE ANO', 'ESSE', 'ESTE');
-                        query += '&year=CURRENT'
+                        query += Bot.getParamsMesToQuery(messagetext, query, 'month', 'NO MES ', 'ESSE ANO', 'ESSE', 'ESTE');
+                        query += '&year=CURRENT&per_page=999'
                         return tocall(datares, chat_id, query);
                     }
                     if(Bot.msgContains(messagetext, 'NO MÊS')) {
-                        query += Bot.getParamsToQuey(messagetext, query, 'month', 'NO MÊS ', 'ESSE ANO', 'ESSE', 'ESTE');
-                        query += '&year=CURRENT'
+                        query += Bot.getParamsMesToQuery(messagetext, query, 'month', 'NO MÊS ', 'ESSE ANO', 'ESSE', 'ESTE');
+                        query += '&year=CURRENT&per_page=999'
                         return tocall(datares, chat_id, query);
                     }
                 }
@@ -595,23 +603,27 @@ module.exports = class Bot {
                     Bot.msgContains(messagetext, 'ANO')
                 ) {
                     if(Bot.msgContains(messagetext, 'MÊS DE')) {
-                        query += Bot.getParamsToQuey(messagetext, query, 'month', 'MÊS DE ', 'NO ANO', 'NO ANO', 'ANO');
-                        query += '&year=CURRENT'
+                        query += Bot.getParamsMesToQuery(messagetext, query, 'month', 'MÊS DE ', 'NO ANO', 'NO ANO', 'ANO');
+                        query += Bot.getParamsAnoToQuery(messagetext, query);
+                        query += '&per_page=999'
                         return tocall(datares, chat_id, query);
                     }
                     if(Bot.msgContains(messagetext, 'MES DE')) {
-                        query += Bot.getParamsToQuey(messagetext, query, 'month', 'MES DE ', 'NO ANO', 'NO ANO', 'ANO');
-                        query += '&year=CURRENT'
+                        query += Bot.getParamsMesToQuery(messagetext, query, 'month', 'MES DE ', 'NO ANO', 'NO ANO', 'ANO');
+                        query += Bot.getParamsAnoToQuery(messagetext, query);
+                        query += '&per_page=999'
                         return tocall(datares, chat_id, query);
                     }
                     if(Bot.msgContains(messagetext, 'NO MES')) {
-                        query += Bot.getParamsToQuey(messagetext, query, 'month', 'NO MES ', 'NO ANO', 'NO ANO', 'ANO');
-                        query += '&year=CURRENT'
+                        query += Bot.getParamsMesToQuery(messagetext, query, 'month', 'NO MES ', 'NO ANO', 'NO ANO', 'ANO');
+                        query += Bot.getParamsAnoToQuery(messagetext, query);
+                        query += '&per_page=999'
                         return tocall(datares, chat_id, query);
                     }
                     if(Bot.msgContains(messagetext, 'NO MÊS')) {
-                        query += Bot.getParamsToQuey(messagetext, query, 'month', 'NO MÊS ', 'NO ANO', 'NO ANO', 'ANO');
-                        query += '&year=CURRENT'
+                        query += Bot.getParamsMesToQuery(messagetext, query, 'month', 'NO MÊS ', 'NO ANO', 'NO ANO', 'ANO');
+                        query += Bot.getParamsAnoToQuery(messagetext, query);
+                        query += '&per_page=999'
                         return tocall(datares, chat_id, query);
                     }
                 }
