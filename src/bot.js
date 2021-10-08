@@ -452,7 +452,7 @@ module.exports = class Bot {
             }
         }
 
-        if(response === '') return Bot.sendDuvidaNaoSei(chat_id);
+        if(response === '') return Bot.sendDuvidaNaoSei(chat_id, datares, messagetext);
         console.log('RESPONSE', response);
         return Bot.sendMessageMarkdown(
             chat_id,
@@ -460,7 +460,7 @@ module.exports = class Bot {
         );
     }
 
-    static sendDuvidaNaoSei(chat_id) {
+    static sendDuvidaNaoSei(chat_id, datares, messagetext) {
         let responsearr = [
             'Olha, eu não entendi, você poderia reformular sua duvida?',
             'eu ainda estou aprendendo, então no momento eu não sei responder sua duvida',
@@ -471,6 +471,7 @@ module.exports = class Bot {
         ];
         let randomIndex = Math.floor(Math.random() * (responsearr.length - 1));
         let response = (responsearr[randomIndex]) ? responsearr[randomIndex] : responsearr[0];
+        Bot.salvaMensagemNaoEntendida(chat_id, datares, messagetext);
         return Bot.sendMessage(
             chat_id,
             response
@@ -526,10 +527,10 @@ module.exports = class Bot {
         return query;
     }
 
-    static processaConsultaQuantidadeVenda(datares, chat_id, query) {
+    static processaConsultaQuantidadeVenda(datares, chat_id, messagetext, query) {
         return new Promise(function(resolve, reject) {
             console.log('processaConsultaQuantidadeVenda');
-            console.log(datares, chat_id, query);
+            console.log(datares, chat_id, messagetext, query);
             Bot.consulta(chat_id, query)
             .then(function(result) {
                 console.log(result);
@@ -559,10 +560,10 @@ module.exports = class Bot {
         });
     }
 
-    static processaConsultaQuantidadeTroca(datares, chat_id, query) {
+    static processaConsultaQuantidadeTroca(datares, chat_id, messagetext, query) {
         return new Promise(function(resolve, reject) {
             console.log('processaConsultaQuantidadeTroca');
-            console.log(datares, chat_id, query);
+            console.log(datares, chat_id, messagetext, query);
             Bot.consulta(chat_id, query)
             .then(function(result) {
                 console.log(result);
@@ -581,7 +582,7 @@ module.exports = class Bot {
         });
     }
 
-    static processaConsultaDiaMaisVendeu(datares, chat_id, query) {
+    static processaConsultaDiaMaisVendeu(datares, chat_id, messagetext, query) {
         return new Promise(function(resolve, reject) {
             console.log('processaConsultaDiaMaisVendeu');
             Bot.consulta(chat_id, query)
@@ -613,7 +614,7 @@ module.exports = class Bot {
         });
     }
 
-    static processaConsultaMarcaMaisVendeu(datares, chat_id, query) {
+    static processaConsultaMarcaMaisVendeu(datares, chat_id, messagetext, query) {
         return new Promise(function(resolve, reject) {
             console.log('processaConsultaMarcaMaisVendeu');
             Bot.consulta(chat_id, query)
@@ -647,7 +648,7 @@ module.exports = class Bot {
                         ).then(res => resolve(res))
                         .catch(err => resolve(err));
                     } else {
-                        Bot.sendDuvidaNaoSei(chat_id)
+                        Bot.sendDuvidaNaoSei(chat_id, datares, messagetext)
                         .then(res => resolve(res))
                         .catch(err => resolve(err));
                     }
@@ -661,7 +662,7 @@ module.exports = class Bot {
         });
     }
 
-    static processaConsultaProdutoMaisVendeu(datares, chat_id, query) {
+    static processaConsultaProdutoMaisVendeu(datares, chat_id, messagetext, query) {
         return new Promise(function(resolve, reject) {
             console.log('processaConsultaProdutoMaisVendeu');
             Bot.consulta(chat_id, query)
@@ -695,7 +696,7 @@ module.exports = class Bot {
                         ).then(res => resolve(res))
                         .catch(err => resolve(err));
                     } else {
-                        Bot.sendDuvidaNaoSei(chat_id)
+                        Bot.sendDuvidaNaoSei(chat_id, datares, messagetext)
                         .then(res => resolve(res))
                         .catch(err => resolve(err));
                     }
@@ -709,9 +710,60 @@ module.exports = class Bot {
         });
     }
 
+    static haveAno(messagetext) {
+        let anos = ['2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'];
+        for(let ano of anos) {
+            if(Bot.msgContains(messagetext, ano)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static getAno(messagetext) {
+        let anos = ['2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'];
+        for(let ano of anos) {
+            if(Bot.msgContains(messagetext, ano)) {
+                return ano;
+            }
+        }
+        return false;
+    }
+
+    static haveMes(messagetext) {
+        let meses = ['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+        for(let mes of meses) {
+            if(Bot.msgContains(messagetext, mes)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static getMes(messagetext) {
+        let meses = ['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+        for(let mes of meses) {
+            if(Bot.msgContains(messagetext, mes)) {
+                return mes;
+            }
+        }
+        return false;
+    }
+
+    static isMes(messtr) {
+        let meses = ['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+        for(let mes of meses) {
+            if(messtr == mes) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     static consultaPeriodo(datares, chat_id, messagetext, query, tocall) {
         if(Bot.msgContains(messagetext, 'MÊS') ||
-            Bot.msgContains(messagetext, 'MES')) {
+            Bot.msgContains(messagetext, 'MES') ||
+            Bot.haveMes(messagetext)) {
             if(Bot.msgContains(messagetext, 'ESTE MÊS') ||
                 Bot.msgContains(messagetext, 'ESTE MES') ||
                 Bot.msgContains(messagetext, 'ESSE MÊS') ||
@@ -722,7 +774,7 @@ module.exports = class Bot {
                     query += (Bot.msgContains(query, '?')) ?
                         '&month=CURRENT' : '?month=CURRENT';
                     query += '&year=CURRENT&per_page=999'
-                    return tocall(datares, chat_id, query);
+                    return tocall(datares, chat_id, messagetext, query);
             }
             if(Bot.msgContains(messagetext, 'NO MÊS DE') ||
                 Bot.msgContains(messagetext, 'NO MES DE') ||
@@ -733,22 +785,22 @@ module.exports = class Bot {
                     if(Bot.msgContains(messagetext, 'MÊS DE')) {
                         query += Bot.getParamsMesToQuery(messagetext, query, 'month', 'MÊS DE ', 'ESSE ANO', 'ESSE', 'ESTE');
                         query += '&year=CURRENT&per_page=999'
-                        return tocall(datares, chat_id, query);
+                        return tocall(datares, chat_id, messagetext, query);
                     }
                     if(Bot.msgContains(messagetext, 'MES DE')) {
                         query += Bot.getParamsMesToQuery(messagetext, query, 'month', 'MES DE ', 'ESSE ANO', 'ESSE', 'ESTE');
                         query += '&year=CURRENT&per_page=999'
-                        return tocall(datares, chat_id, query);
+                        return tocall(datares, chat_id, messagetext, query);
                     }
                     if(Bot.msgContains(messagetext, 'NO MES')) {
                         query += Bot.getParamsMesToQuery(messagetext, query, 'month', 'NO MES ', 'ESSE ANO', 'ESSE', 'ESTE');
                         query += '&year=CURRENT&per_page=999'
-                        return tocall(datares, chat_id, query);
+                        return tocall(datares, chat_id, messagetext, query);
                     }
                     if(Bot.msgContains(messagetext, 'NO MÊS')) {
                         query += Bot.getParamsMesToQuery(messagetext, query, 'month', 'NO MÊS ', 'ESSE ANO', 'ESSE', 'ESTE');
                         query += '&year=CURRENT&per_page=999'
-                        return tocall(datares, chat_id, query);
+                        return tocall(datares, chat_id, messagetext, query);
                     }
                 }
                 if(Bot.msgContains(messagetext, 'NO ANO DE') ||
@@ -759,39 +811,64 @@ module.exports = class Bot {
                         query += Bot.getParamsMesToQuery(messagetext, query, 'month', 'MÊS DE ', 'NO ANO', 'NO ANO', 'ANO');
                         query += Bot.getParamsAnoToQuery(messagetext, query);
                         query += '&per_page=999'
-                        return tocall(datares, chat_id, query);
+                        return tocall(datares, chat_id, messagetext, query);
                     }
                     if(Bot.msgContains(messagetext, 'MES DE')) {
                         query += Bot.getParamsMesToQuery(messagetext, query, 'month', 'MES DE ', 'NO ANO', 'NO ANO', 'ANO');
                         query += Bot.getParamsAnoToQuery(messagetext, query);
                         query += '&per_page=999'
-                        return tocall(datares, chat_id, query);
+                        return tocall(datares, chat_id, messagetext, query);
                     }
                     if(Bot.msgContains(messagetext, 'NO MES')) {
                         query += Bot.getParamsMesToQuery(messagetext, query, 'month', 'NO MES ', 'NO ANO', 'NO ANO', 'ANO');
                         query += Bot.getParamsAnoToQuery(messagetext, query);
                         query += '&per_page=999'
-                        return tocall(datares, chat_id, query);
+                        return tocall(datares, chat_id, messagetext, query);
                     }
                     if(Bot.msgContains(messagetext, 'NO MÊS')) {
                         query += Bot.getParamsMesToQuery(messagetext, query, 'month', 'NO MÊS ', 'NO ANO', 'NO ANO', 'ANO');
                         query += Bot.getParamsAnoToQuery(messagetext, query);
                         query += '&per_page=999'
-                        return tocall(datares, chat_id, query);
+                        return tocall(datares, chat_id, messagetext, query);
                     }
                 }
             }
-
+            if(Bot.haveMes(messagetext)) {
+                let mes = Bot.getMes(messagetext);
+                query += `&month=${mes}`;
+                if(Bot.haveAno(messagetext)) {
+                    let ano = Bot.getAno(messagetext);
+                    query += `&year=${ano}`;
+                } else {
+                    query += `&year=CURRENT`;
+                }
+            }
         }
         if(Bot.msgContains(messagetext, 'HOJE')) {
             query += '&contability_date=today';
-            return tocall(datares, chat_id, query);
+            return tocall(datares, chat_id, messagetext, query);
         }
         if(Bot.msgContains(messagetext, 'ONTEM')) {
             query += '&contability_date=yesterday';
-            return tocall(datares, chat_id, query);
+            return tocall(datares, chat_id, messagetext, query);
         }
-        return Bot.sendDuvidaNaoSei(chat_id);
+        return Bot.sendDuvidaNaoSei(chat_id, datares, messagetext);
+    }
+
+    static salvaMensagemNaoEntendida(chat_id, datares, messagetext) {
+        console.log('MENSAGEM NAO ENTENDIDA!!');
+        console.log(chat_id, datares, messagetext);
+    }
+
+    static sendSugestao(chat_id, datares, messagetext, sugestao) {
+        return new Promise(function(resolve, reject) {
+            Bot.salvaMensagemNaoEntendida(chat_id, datares, messagetext);
+            Bot.sendMessage(
+                chat_id,
+                message
+            ).then(res => resolve(res))
+            .catch(err => resolve(err));
+        });
     }
 
     static intencaoConsultaQuantidade(datares, chat_id, messagetext) {
@@ -855,6 +932,9 @@ module.exports = class Bot {
                     Bot.processaConsultaQuantidadeTroca
                 );
             }
+            return Bot.sendSugestao(chat_id,
+                'Não entendi a pergunta, você pode me perguntar por exemplo: Quantas vendas foram feitas este mês, ou quantas trocas foram feitas em dezembro de 2020'
+            );
         }
         if(Bot.isPartner(datares)) {
             if(Bot.msgContains(messagetext, 'VENDA')) {
@@ -868,7 +948,7 @@ module.exports = class Bot {
             }
         }
 
-        if(response === '') return Bot.sendDuvidaNaoSei(chat_id);
+        if(response === '') return Bot.sendDuvidaNaoSei(chat_id, datares, messagetext);
         return Bot.sendMessage(
             chat_id,
             response
@@ -920,7 +1000,7 @@ module.exports = class Bot {
             }
         }
 
-        if(response === '') return Bot.sendDuvidaNaoSei(chat_id);
+        if(response === '') return Bot.sendDuvidaNaoSei(chat_id, datares, messagetext);
         return Bot.sendMessage(
             chat_id,
             response
@@ -947,7 +1027,7 @@ module.exports = class Bot {
             return Bot.intencaoConsultaIdentidade(datares, chat_id, messagetext);
         }
 
-        if(response === '') return Bot.sendDuvidaNaoSei(chat_id);
+        if(response === '') return Bot.sendDuvidaNaoSei(chat_id, datares, messagetext);
         return Bot.sendMessage(
             chat_id,
             response
