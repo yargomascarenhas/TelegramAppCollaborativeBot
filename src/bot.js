@@ -731,7 +731,7 @@ module.exports = class Bot {
     }
 
     static haveMes(messagetext) {
-        let meses = ['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+        let meses = ['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
         for(let mes of meses) {
             if(Bot.msgContains(messagetext, mes)) {
                 return true;
@@ -741,7 +741,7 @@ module.exports = class Bot {
     }
 
     static getMes(messagetext) {
-        let meses = ['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+        let meses = ['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
         for(let mes of meses) {
             if(Bot.msgContains(messagetext, mes)) {
                 return mes;
@@ -751,7 +751,7 @@ module.exports = class Bot {
     }
 
     static isMes(messtr) {
-        let meses = ['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+        let meses = ['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
         for(let mes of meses) {
             if(messtr == mes) {
                 return true;
@@ -834,14 +834,15 @@ module.exports = class Bot {
                 }
             }
             if(Bot.haveMes(messagetext)) {
-                let mes = Bot.getMes(messagetext);
-                query += `&month=${mes}`;
+                let mes = Bot.getMesByString(Bot.getMes(messagetext));
+                query += (Bot.msgContains(query, '?')) ? `&month=${mes}` : `?month=${mes}`;
                 if(Bot.haveAno(messagetext)) {
                     let ano = Bot.getAno(messagetext);
                     query += `&year=${ano}`;
                 } else {
                     query += `&year=CURRENT`;
                 }
+                return tocall(datares, chat_id, messagetext, query);
             }
         }
         if(Bot.msgContains(messagetext, 'HOJE')) {
