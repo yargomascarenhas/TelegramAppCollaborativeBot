@@ -556,6 +556,93 @@ module.exports = class Bot {
         });
     }
 
+    static processaConsultaQuantidadeTroca(datares, chat_id, query) {
+        return new Promise(function(resolve, reject) {
+            console.log('processaConsultaQuantidadeTroca');
+            console.log(datares, chat_id, query);
+            Bot.consulta(chat_id, query)
+            .then(function(result) {
+                console.log(result);
+                if(result.data) {
+                    Bot.sendMessage(
+                        chat_id,
+                        `Foram feitas um total de ${result._links.count} trocas.`
+                    ).then(res => resolve(res))
+                    .catch(err => resolve(err));
+                }
+            })
+            .catch(function(err) {
+                console.log(err);
+                reject(err);
+            })
+        });
+    }
+
+    static processaConsultaDiaMaisVendeu(datares, chat_id, query) {
+        return new Promise(function(resolve, reject) {
+            console.log('processaConsultaDiaMaisVendeu');
+            Bot.consulta(chat_id, query)
+            .then(function(result) {
+                console.log(result);
+                let maisvendeu = {};
+                if(result.data) {
+                    for(let item of result.data) {
+                        if(!maisvendeu.id) maisvendeu = item;
+                        if(parseFloat(item.amount) > parseFloat(maisvendeu.amount)) {
+                            maisvendeu.item;
+                        }
+                    }
+                    let message = (maisvendeu.id)
+                        ? `Foi no dia ${maisvendeu.contability_at.substr(0, 10)}, um total de R$${maisvendeu.amount}.`
+                        : 'Nesse mês não foram realizadas vendas ainda.';
+
+                    Bot.sendMessage(
+                        chat_id,
+                        message
+                    ).then(res => resolve(res))
+                    .catch(err => resolve(err));
+                }
+            })
+            .catch(function(err) {
+                console.log(err);
+                reject(err);
+            })
+        });
+    }
+
+    static processaConsultaMarcaMaisVendeu(datares, chat_id, query) {
+        return new Promise(function(resolve, reject) {
+            console.log('processaConsultaMarcaMaisVendeu');
+            Bot.consulta(chat_id, query)
+            .then(function(result) {
+                console.log(result);
+                let maisvendeu = {};
+                if(result.data) {
+                    for(let item of result.data) {
+                        if(!maisvendeu.id) maisvendeu = item;
+                        if(parseFloat(item.amount) > parseFloat(maisvendeu.amount)) {
+                            maisvendeu.item;
+                        }
+                    }
+
+                    let message = (maisvendeu.id)
+                        ? `Foi a marca ${maisvendeu.brand.name}, um total de R$${maisvendeu.amount}.`
+                        : 'Nesse mês não foram realizadas vendas ainda.';
+
+                    Bot.sendMessage(
+                        chat_id,
+                        message
+                    ).then(res => resolve(res))
+                    .catch(err => resolve(err));
+                }
+            })
+            .catch(function(err) {
+                console.log(err);
+                reject(err);
+            })
+        });
+    }
+
     static consultaPeriodo(datares, chat_id, messagetext, query, tocall) {
         if(Bot.msgContains(messagetext, 'MÊS') ||
             Bot.msgContains(messagetext, 'MES')) {
@@ -634,31 +721,9 @@ module.exports = class Bot {
             query += '&contability_date=today';
             return tocall(datares, chat_id, query);
         }
-        if(Bot.msgContains(messagetext, 'DIA')) {
-            if(Bot.msgContains(messagetext, 'ESTE MÊS') ||
-                Bot.msgContains(messagetext, 'ESTE MES') ||
-                Bot.msgContains(messagetext, 'ESSE MÊS') ||
-                Bot.msgContains(messagetext, 'ESSE MES') ||
-                Bot.msgContains(messagetext, 'MÊS ATUAL') ||
-                Bot.msgContains(messagetext, 'MES ATUAL') ||
-                Bot.msgContains(messagetext, 'MÊS CORRENTE')) {
-
-            }
-            if(Bot.msgContains(messagetext, 'NO MÊS DE') ||
-                Bot.msgContains(messagetext, 'NO MES DE') ||
-                Bot.msgContains(messagetext, 'NO MÊS') ||
-                Bot.msgContains(messagetext, 'NO MES')) {
-                if(Bot.msgContains(messagetext, 'ESTE ANO') ||
-                    Bot.msgContains(messagetext, 'ESSE ANO')) {
-
-                }
-                if(Bot.msgContains(messagetext, 'NO ANO DE') ||
-                    Bot.msgContains(messagetext, 'NO ANO') ||
-                    Bot.msgContains(messagetext, 'ANO')
-                ) {
-
-                }
-            }
+        if(Bot.msgContains(messagetext, 'ONTEM')) {
+            query += '&contability_date=yesterday';
+            return tocall(datares, chat_id, query);
         }
         return Bot.sendDuvidaNaoSei(chat_id);
     }
@@ -689,7 +754,7 @@ module.exports = class Bot {
                         Bot.processaConsultaQuantidadeVenda
                     );
                 }
-                if(Bot.msgContains(messagetext, 'EU FIZ')) {
+                if(Bot.msgContains(messagetext, 'FIZ')) {
                     return Bot.consultaPeriodo(
                         datares,
                         chat_id,
@@ -704,6 +769,24 @@ module.exports = class Bot {
                     messagetext,
                     'sales',
                     Bot.processaConsultaQuantidadeVenda
+                );
+            }
+            if(Bot.msgContains(messagetext, 'TROCA')) {
+                if(Bot.msgContains(messagetext, 'FIZ')) {
+                    return Bot.consultaPeriodo(
+                        datares,
+                        chat_id,
+                        messagetext,
+                        `sales/exchanges?user_id=${datares.data.user.id}`,
+                        Bot.processaConsultaQuantidadeTroca
+                    );
+                }
+                return Bot.consultaPeriodo(
+                    datares,
+                    chat_id,
+                    messagetext,
+                    'sales/exchanges',
+                    Bot.processaConsultaQuantidadeTroca
                 );
             }
         }
@@ -728,7 +811,43 @@ module.exports = class Bot {
 
     static intencaoConsultaIdentidade(datares, chat_id, messagetext) {
         console.log('intencaoConsultaIdentidade');
-        let response = 'não entendi, por favor reformule sua pergunta';
+        let response = '';
+
+        if(Bot.isDefault(datares)) {
+            if(Bot.msgContains(messagetext, 'VEND')) {
+                if(Bot.msgContains(messagetext, 'QUAL DIA') ||
+                    Bot.msgContains(messagetext, 'QUE DIA')) {
+                    return Bot.consultaPeriodo(
+                        datares,
+                        chat_id,
+                        messagetext,
+                        'sales?sum=amount&group=contability_date,status&sort=contability_date&lastdays=31',
+                        Bot.processaConsultaDiaMaisVendeu
+                    );
+                }
+                if(Bot.msgContains(messagetext, 'MARCA') ||
+                    Bot.msgContains(messagetext, 'PARCEIR')) {
+                    return Bot.consultaPeriodo(
+                        datares,
+                        chat_id,
+                        messagetext,
+                        'sales/items?sum=amount&group=brand_id',
+                        Bot.processaConsultaMarcaMaisVendeu
+                    );
+                }
+            }
+            if(Bot.msgContains(messagetext, 'MARCA') ||
+                Bot.msgContains(messagetext, 'PARCEIR')) {
+
+            }
+        }
+        if(Bot.isPartner(datares)) {
+            if(Bot.msgContains(messagetext, 'VEND')) {
+
+            }
+        }
+
+        if(response === '') return Bot.sendDuvidaNaoSei(chat_id);
         return Bot.sendMessage(
             chat_id,
             response
