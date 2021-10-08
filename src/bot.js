@@ -634,10 +634,10 @@ module.exports = class Bot {
                     }
                     let message = '';
                     if((maisvendeu.id)) {
-                        message += `A marca que mais vendeu foi a ${maisvendeu.brand.name}, um total de R$${maisvendeu.amount}.`;
+                        message += `A marca que mais vendeu foi a ${maisvendeu.brand.name} somando R$${maisvendeu.amount}`;
                     }
                     if(menosvendeu.id) {
-                        message += `, e a marcar que menos vendeu foi a ${menosvendeu.brand.name}, um total de R$${menosvendeu.amount}}`;
+                        message += `, e a marcar que menos vendeu foi a ${menosvendeu.brand.name}, um total de R$${menosvendeu.amount}`;
                     }
                     if(message != '') {
                         message += ', isso sem incluir as marcas que não venderam nada.';
@@ -682,10 +682,10 @@ module.exports = class Bot {
                     }
                     let message = '';
                     if((maisvendeu.id)) {
-                        message += `O produto que mais vendeu foi (${maisvendeu.product.id})${maisvendeu.product.description}, um total de R$${maisvendeu.amount}.`;
+                        message += `O produto que mais vendeu foi (${maisvendeu.product.id}) ${maisvendeu.product.description} somando R$${maisvendeu.amount}`;
                     }
                     if(menosvendeu.id) {
-                        message += `, e o produto que menos vendeu foi a (${maisvendeu.product.id})${maisvendeu.product.description}, um total de R$${menosvendeu.amount}}`;
+                        message += `, e o produto que menos vendeu foi (${menosvendeu.product.id}) ${menosvendeu.product.description} somando R$${menosvendeu.amount}}`;
                     }
                     if(message != '') {
                         message += ', isso sem incluir os produtos que não venderam nada.';
