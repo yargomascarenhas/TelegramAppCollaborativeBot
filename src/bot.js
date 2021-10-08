@@ -202,6 +202,9 @@ module.exports = class Bot {
         if(Bot.msgContains(messagetext, 'OBRIGAD')) {
             response = `Nada, eu que agradeço!`;
         }
+        if(Bot.msgContains(messagetext, 'OK')) {
+            response = `Ok!`;
+        }
         if((Bot.msgContains(messagetext, 'TUDO')
             && Bot.msgContains(messagetext, 'TD'))
             && (Bot.msgContains(messagetext, 'VC?')
@@ -589,7 +592,7 @@ module.exports = class Bot {
                     for(let item of result.data) {
                         if(!maisvendeu.id) maisvendeu = item;
                         if(parseFloat(item.amount) > parseFloat(maisvendeu.amount)) {
-                            maisvendeu.item;
+                            maisvendeu = item;
                         }
                     }
                     let message = (maisvendeu.id)
@@ -617,23 +620,86 @@ module.exports = class Bot {
             .then(function(result) {
                 console.log(result);
                 let maisvendeu = {};
+                let menosvendeu = {}
                 if(result.data) {
                     for(let item of result.data) {
                         if(!maisvendeu.id) maisvendeu = item;
+                        if(!menosvendeu.id) menosvendeu = item;
                         if(parseFloat(item.amount) > parseFloat(maisvendeu.amount)) {
-                            maisvendeu.item;
+                            maisvendeu = item;
+                        }
+                        if(parseFloat(item.amount) < parseFloat(menosvendeu.amount)) {
+                            menosvendeu = item;
                         }
                     }
+                    let message = '';
+                    if((maisvendeu.id)) {
+                        message += `A marca que mais vendeu foi a ${maisvendeu.brand.name}, um total de R$${maisvendeu.amount}.`;
+                    }
+                    if(menosvendeu.id) {
+                        message += `, e a marcar que menos vendeu foi a ${menosvendeu.brand.name}, um total de R$${menosvendeu.amount}}`;
+                    }
+                    if(message != '') {
+                        message += ', isso sem incluir as marcas que não venderam nada.';
+                        Bot.sendMessage(
+                            chat_id,
+                            message
+                        ).then(res => resolve(res))
+                        .catch(err => resolve(err));
+                    } else {
+                        Bot.sendDuvidaNaoSei(chat_id)
+                        .then(res => resolve(res))
+                        .catch(err => resolve(err));
+                    }
 
-                    let message = (maisvendeu.id)
-                        ? `Foi a marca ${maisvendeu.brand.name}, um total de R$${maisvendeu.amount}.`
-                        : 'Nesse mês não foram realizadas vendas ainda.';
+                }
+            })
+            .catch(function(err) {
+                console.log(err);
+                reject(err);
+            })
+        });
+    }
 
-                    Bot.sendMessage(
-                        chat_id,
-                        message
-                    ).then(res => resolve(res))
-                    .catch(err => resolve(err));
+    static processaConsultaProdutoMaisVendeu(datares, chat_id, query) {
+        return new Promise(function(resolve, reject) {
+            console.log('processaConsultaProdutoMaisVendeu');
+            Bot.consulta(chat_id, query)
+            .then(function(result) {
+                console.log(result);
+                let maisvendeu = {};
+                let menosvendeu = {}
+                if(result.data) {
+                    for(let item of result.data) {
+                        if(!maisvendeu.id) maisvendeu = item;
+                        if(!menosvendeu.id) menosvendeu = item;
+                        if(parseFloat(item.amount) > parseFloat(maisvendeu.amount)) {
+                            maisvendeu = item;
+                        }
+                        if(parseFloat(item.amount) < parseFloat(menosvendeu.amount)) {
+                            menosvendeu = item;
+                        }
+                    }
+                    let message = '';
+                    if((maisvendeu.id)) {
+                        message += `O produto que mais vendeu foi (${maisvendeu.product.id})${maisvendeu.product.description}, um total de R$${maisvendeu.amount}.`;
+                    }
+                    if(menosvendeu.id) {
+                        message += `, e o produto que menos vendeu foi a (${maisvendeu.product.id})${maisvendeu.product.description}, um total de R$${menosvendeu.amount}}`;
+                    }
+                    if(message != '') {
+                        message += ', isso sem incluir os produtos que não venderam nada.';
+                        Bot.sendMessage(
+                            chat_id,
+                            message
+                        ).then(res => resolve(res))
+                        .catch(err => resolve(err));
+                    } else {
+                        Bot.sendDuvidaNaoSei(chat_id)
+                        .then(res => resolve(res))
+                        .catch(err => resolve(err));
+                    }
+
                 }
             })
             .catch(function(err) {
@@ -835,6 +901,13 @@ module.exports = class Bot {
                         Bot.processaConsultaMarcaMaisVendeu
                     );
                 }
+                return Bot.consultaPeriodo(
+                    datares,
+                    chat_id,
+                    messagetext,
+                    'sales/items?sum=amount&group=product_id',
+                    Bot.processaConsultaProdutoMaisVendeu
+                );
             }
             if(Bot.msgContains(messagetext, 'MARCA') ||
                 Bot.msgContains(messagetext, 'PARCEIR')) {
