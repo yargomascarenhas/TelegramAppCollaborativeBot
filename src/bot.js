@@ -560,6 +560,36 @@ module.exports = class Bot {
         });
     }
 
+    static processaConsultaQuantidadeItem(datares, chat_id, messagetext, query) {
+        return new Promise(function(resolve, reject) {
+            console.log('processaConsultaQuantidadeItem');
+            console.log(datares, chat_id, messagetext, query);
+            Bot.consulta(chat_id, query)
+            .then(function(result) {
+                console.log(result);
+                let commission = 0;
+                let closed = 0;
+                if(result.data) {
+                    for(let item of result.data) {
+                        if(item.sale.status == 'BAI') {
+                            closed += parseFloat(item.amount);
+                            commission += parseFloat(item.commission);
+                        }
+                    }
+                    Bot.sendMessage(
+                        chat_id,
+                        `Um total de ${result.data.length} de vendas, que totalizam R$${closed.toFixed(2)}. Sendo um total de R$${commission.toFixed(2)} em comissão`
+                    ).then(res => resolve(res))
+                    .catch(err => resolve(err));
+                }
+            })
+            .catch(function(err) {
+                console.log(err);
+                reject(err);
+            })
+        });
+    }
+
     static processaConsultaQuantidadeTroca(datares, chat_id, messagetext, query) {
         return new Promise(function(resolve, reject) {
             console.log('processaConsultaQuantidadeTroca');
@@ -863,10 +893,11 @@ module.exports = class Bot {
 
     static sendSugestao(chat_id, datares, messagetext, sugestao) {
         return new Promise(function(resolve, reject) {
+            console.log('SEND SUGESTAO', sugestao);
             Bot.salvaMensagemNaoEntendida(chat_id, datares, messagetext);
             Bot.sendMessage(
                 chat_id,
-                message
+                sugestao
             ).then(res => resolve(res))
             .catch(err => resolve(err));
         });
@@ -933,7 +964,7 @@ module.exports = class Bot {
                     Bot.processaConsultaQuantidadeTroca
                 );
             }
-            return Bot.sendSugestao(chat_id,
+            return Bot.sendSugestao(chat_id, datares, messagetext,
                 'Não entendi a pergunta, você pode me perguntar por exemplo: Quantas vendas foram feitas este mês, ou quantas trocas foram feitas em dezembro de 2020'
             );
         }
@@ -943,10 +974,13 @@ module.exports = class Bot {
                     datares,
                     chat_id,
                     messagetext,
-                    'sales',
-                    Bot.processaConsultaQuantidadeVenda
+                    'sales/comissions?ump=1&sum=amount&group=sale_id',
+                    Bot.processaConsultaQuantidadeItem
                 );
             }
+            return Bot.sendSugestao(chat_id, datares, messagetext,
+                'Não entendi a pergunta, você pode me perguntar por exemplo: Quantas vendas feitas este mês, ou quantas vendas foram feitas em dezembro de 2020'
+            );
         }
 
         if(response === '') return Bot.sendDuvidaNaoSei(chat_id, datares, messagetext);
