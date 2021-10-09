@@ -46,7 +46,18 @@ module.exports = class Bot {
                     });
                 } else {
                     console.log('NAO RETORNOU TOKEN, RETORNOU:')
-                    resolve(res);
+                    if(res.message == 'MORE_THAN_ONE_ENVIRONMENT_ACCESS') {
+                        let message = 'Você deseja ver de qual loja? digite:';
+                        for(let loja of res.environments) {
+                            message += `\nloja ${loja.id} (para ver da ${loja.name})`;
+                        }
+                        Bot.sendMessage(chat_id,
+                        message)
+                        .then(res => resolve(res))
+                        .catch(err => resolve(err));
+                    } else {
+                        resolve(res);
+                    }
                 }
             })
             .catch(err => {
@@ -157,6 +168,24 @@ module.exports = class Bot {
             Bot.sendServerFailMessage(req)
             .then(function(result) {res.status(200).send({})})
             .catch(function(result) {res.status(200).send({})});
+        });
+    }
+
+    static setarLojaPreferencia(datares, chat_id, envid) {
+        return new Promise((resolve, reject) => {
+            console.log('setarLojaPreferencia', datares, envid);
+            Collaborative.updateEnvironment(chat_id, {
+                environment_id: envid,
+                partneruser_id: datares.data.partneruser_id
+            })
+            .then(function(datares) {
+                if(datares.id) {
+                    resolve(datares);
+                } else {
+                    reject(datares);
+                }
+            })
+            .catch(err => reject(err));
         });
     }
 
@@ -1022,10 +1051,51 @@ module.exports = class Bot {
         );
     }
 
+    static msgStartWith(messagetext, starts) {
+        return (new RegExp('^' + starts, 'i')).test(messagetext);
+    }
+
+    static intencaoSetarLoja(datares, chat_id, messagetext) {
+        return new Promise((resolve,reject) => {
+            let parts = messagetext.toUpperCase().split('LOJA ');
+            let envid = parts[1].trim();
+            Bot.setarLojaPreferencia(datares, chat_id, envid)
+            .then(res => {
+                Bot.sendMessage(chat_id, 'Loja selecionada com sucesso, por favor repita a pergunta.')
+                .then(res => resolve(res))
+                .catch(err => resolve(err));
+            })
+            .catch(err => {
+                console.log('ERR', err);
+                Bot.sendMessage(chat_id, 'Não consegui selecionar a loja, verifica se você digitou o numero correto.')
+                .then(res => resolve(res))
+                .catch(err => resolve(err));
+            })
+        });
+    }
+
+    static intencaoTrocarLoja(datares, chat_id, messagetext) {
+        return new Promise((resolve,reject) => {
+            Bot.setarLojaPreferencia(datares, chat_id, null)
+            .then(res => {
+                Bot.consulta(chat_id, 'scripts/ping')
+                .then(res => resolve(res))
+                .catch(err => resolve(err));
+            })
+            .catch(err => {
+                console.log('ERR', err);
+                Bot.sendMessage(chat_id, 'Não consegui selecionar a loja, verifica se você digitou o numero correto.')
+                .then(res => resolve(res))
+                .catch(err => resolve(err));
+            })
+        });
+    }
+
     static processConversation(req, datares) {
         const chat_id = req.body.message.chat.id;
         const messagetext = req.body.message.text;
         let response = '';
+        console.log('MENSAGEM', messagetext);
         console.log('processConversation');
         response = Bot.respostaDireta(messagetext);
         if(Bot.msgContains(messagetext, 'COMO')) {
@@ -1040,6 +1110,14 @@ module.exports = class Bot {
         if(Bot.msgContains(messagetext, 'QUAL')
             || Bot.msgContains(messagetext, 'O QUE')) {
             return Bot.intencaoConsultaIdentidade(datares, chat_id, messagetext);
+        }
+        if(Bot.msgContains(messagetext, 'LOJA')
+            && Bot.msgStartWith(messagetext, 'LOJA')) {
+            return Bot.intencaoSetarLoja(datares, chat_id, messagetext);
+        }
+        if(Bot.msgContains(messagetext, 'TROCAR DE LOJA')
+            && Bot.msgStartWith(messagetext, 'TROCAR DE LOJA')) {
+            return Bot.intencaoTrocarLoja(datares, chat_id, messagetext);
         }
 
         if(response === '') return Bot.sendDuvidaNaoSei(chat_id, datares, messagetext);
