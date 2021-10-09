@@ -36,17 +36,12 @@ module.exports = class Bot {
         return new Promise(function(resolve, reject) {
             Collaborative.getAuthToken(chat_id)
             .then(res => {
-                console.log(res);
                 if(res.token) {
-                    console.log('RETORNOU TOKEN', res.token);
-                    console.log('CONSULTANDO POR', query);
                     Collaborative.queryAuth(query, res.token)
                     .then(resd => {
-                        console.log('RETORNOU RESULTADO', resd);
                         resolve(resd);
                     })
                     .catch(errd => {
-                        console.log('ERR NAO RETORNOU RESULTADO', errd);
                         reject(errd);
                     });
                 } else {
@@ -64,8 +59,6 @@ module.exports = class Bot {
     static sendMessageMarkdown(chat_id, message) {
         return new Promise(function(resolve, reject) {
             console.log('STARTING sendMessageMarkdown');
-            console.log(message);
-            console.log(chat_id);
             Api.postByBody(
                 process.env.TELEGRAMBOT_URI,
                 '/sendMessage',
@@ -172,7 +165,6 @@ module.exports = class Bot {
     }
 
     static isDefault(datares) {
-        console.log('ISDEFAULT, DATARES', datares);
         return datares.data.user.type === 'USER';
     }
 
@@ -235,7 +227,6 @@ module.exports = class Bot {
         let response = '';
 
         if(Bot.isDefault(datares)) {
-            console.log('isDefault: true');
             if(Bot.msgContains(messagetext, 'CHECKIN') ||
                 Bot.msgContains(messagetext, 'CHECK-IN')) {
                 if(Bot.msgContains(messagetext, 'FAZER') ||
@@ -276,7 +267,6 @@ module.exports = class Bot {
                 response = 'Você pode imprimir etiquetas em qualquer tipo de impressora utilizando o AppCollaborative, lembre\\-se sempre de utilizar o Google Chrome, para mais detalhes preparamos esse video que ensina como configurar e imprimir: [Etiquetas](https://youtu.be/uBjCMwXFRJI)';
             }
             if(Bot.msgContains(messagetext, 'PRODUTO')) {
-                console.log('CONTAINS: PRODUTO');
                 if(Bot.msgContains(messagetext, 'CADASTR') ||
                     Bot.msgContains(messagetext, 'SALV') ||
                     Bot.msgContains(messagetext, 'EDIT') ||
@@ -415,7 +405,6 @@ module.exports = class Bot {
                 response = 'Você pode imprimir etiquetas em qualquer tipo de impressora utilizando o AppCollaborative, lembre\\-se sempre de utilizar o Google Chrome, para mais detalhes preparamos esse video que ensina como configurar e imprimir: [Etiquetas](https://youtu.be/uBjCMwXFRJI)';
             }
             if(Bot.msgContains(messagetext, 'PRODUTO')) {
-                console.log('CONTAINS: PRODUTO');
                 if(Bot.msgContains(messagetext, 'CADASTR') ||
                     Bot.msgContains(messagetext, 'SALV') ||
                     Bot.msgContains(messagetext, 'EDIT') ||
@@ -453,7 +442,6 @@ module.exports = class Bot {
         }
 
         if(response === '') return Bot.sendDuvidaNaoSei(chat_id, datares, messagetext);
-        console.log('RESPONSE', response);
         return Bot.sendMessageMarkdown(
             chat_id,
             response
@@ -530,10 +518,8 @@ module.exports = class Bot {
     static processaConsultaQuantidadeVenda(datares, chat_id, messagetext, query) {
         return new Promise(function(resolve, reject) {
             console.log('processaConsultaQuantidadeVenda');
-            console.log(datares, chat_id, messagetext, query);
             Bot.consulta(chat_id, query)
             .then(function(result) {
-                console.log(result);
                 let amount = 0;
                 let open = 0;
                 let closed = 0;
@@ -563,10 +549,8 @@ module.exports = class Bot {
     static processaConsultaQuantidadeItem(datares, chat_id, messagetext, query) {
         return new Promise(function(resolve, reject) {
             console.log('processaConsultaQuantidadeItem');
-            console.log(datares, chat_id, messagetext, query);
             Bot.consulta(chat_id, query)
             .then(function(result) {
-                console.log(result);
                 let commission = 0;
                 let closed = 0;
                 if(result.data) {
@@ -593,7 +577,6 @@ module.exports = class Bot {
     static processaConsultaQuantidadeTroca(datares, chat_id, messagetext, query) {
         return new Promise(function(resolve, reject) {
             console.log('processaConsultaQuantidadeTroca');
-            console.log(datares, chat_id, messagetext, query);
             Bot.consulta(chat_id, query)
             .then(function(result) {
                 console.log(result);
@@ -617,7 +600,6 @@ module.exports = class Bot {
             console.log('processaConsultaDiaMaisVendeu');
             Bot.consulta(chat_id, query)
             .then(function(result) {
-                console.log(result);
                 let maisvendeu = {};
                 if(result.data) {
                     for(let item of result.data) {
@@ -697,7 +679,6 @@ module.exports = class Bot {
             console.log('processaConsultaProdutoMaisVendeu');
             Bot.consulta(chat_id, query)
             .then(function(result) {
-                console.log(result);
                 let maisvendeu = {};
                 let menosvendeu = {}
                 if(result.data) {
@@ -887,13 +868,12 @@ module.exports = class Bot {
     }
 
     static salvaMensagemNaoEntendida(chat_id, datares, messagetext) {
-        console.log('MENSAGEM NAO ENTENDIDA!!');
-        console.log(chat_id, datares, messagetext);
+        console.log('MENSAGEM NAO ENTENDIDA!!', messagetext);
+        console.log(chat_id, datares);
     }
 
     static sendSugestao(chat_id, datares, messagetext, sugestao) {
         return new Promise(function(resolve, reject) {
-            console.log('SEND SUGESTAO', sugestao);
             Bot.salvaMensagemNaoEntendida(chat_id, datares, messagetext);
             Bot.sendMessage(
                 chat_id,
