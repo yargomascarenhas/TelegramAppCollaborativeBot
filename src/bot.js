@@ -203,7 +203,8 @@ module.exports = class Bot {
     static respostaDireta(messagetext) {
         console.log('respostaDireta');
         let response = '';
-        if(Bot.msgContains(messagetext, 'OI')) {
+        if(Bot.msgContains(messagetext, 'OI') ||
+            Bot.msgContains(messagetext, '/START')) {
             response = `Oi, como posso ajudar?`;
         }
         if(Bot.msgContains(messagetext, 'OLÁ') ||
@@ -226,8 +227,20 @@ module.exports = class Bot {
             response = `Ok!`;
         }
         if((Bot.msgContains(messagetext, 'TUDO')
-            && Bot.msgContains(messagetext, 'TD'))
+            || Bot.msgContains(messagetext, 'TD'))
             && (Bot.msgContains(messagetext, 'VC?')
+            || Bot.msgContains(messagetext, 'VOCE?')
+            || Bot.msgContains(messagetext, 'VOCÊ?')
+            || Bot.msgContains(messagetext, 'TU?')
+            || Bot.msgContains(messagetext, 'VAI?')
+            || Bot.msgContains(messagetext, 'BEM')
+            || Bot.msgContains(messagetext, 'ESTA?')
+            || Bot.msgContains(messagetext, 'CONTIGO?'))) {
+            response = `Estou bem, obrigada por perguntar. Como posso ajudar?`;
+        }
+        if((Bot.msgContains(messagetext, 'TUDO')
+            || Bot.msgContains(messagetext, 'TD'))
+            && !(Bot.msgContains(messagetext, 'VC?')
             || Bot.msgContains(messagetext, 'VOCE?')
             || Bot.msgContains(messagetext, 'VOCÊ?')
             || Bot.msgContains(messagetext, 'TU?')
@@ -236,16 +249,15 @@ module.exports = class Bot {
             || Bot.msgContains(messagetext, 'CONTIGO?'))) {
             response = `Estou bem, obrigada por perguntar. Como posso ajudar?`;
         }
-        if((Bot.msgContains(messagetext, 'TUDO')
-            && Bot.msgContains(messagetext, 'TD'))
-            && !(Bot.msgContains(messagetext, 'VC?')
-            || Bot.msgContains(messagetext, 'VOCE?')
-            || Bot.msgContains(messagetext, 'VOCÊ?')
-            || Bot.msgContains(messagetext, 'TU?')
-            || Bot.msgContains(messagetext, 'VAI?')
-            || Bot.msgContains(messagetext, 'ESTA?')
-            || Bot.msgContains(messagetext, 'CONTIGO?'))) {
-            response = `Posso ajudar de alguma forma?`;
+        return response;
+    }
+
+    static conversaFiada(messagetext) {
+        console.log('conversaFiada');
+        let response = '';
+        if(Bot.msgContains(messagetext, 'PODE SIM') ||
+            Bot.msgContains(messagetext, 'ESPERO QUE SIM')) {
+            response = `Que legal! me fala sua dúvida`;
         }
         return response;
     }
@@ -1095,6 +1107,7 @@ module.exports = class Bot {
         let response = '';
         console.log('MENSAGEM', messagetext);
         console.log('processConversation');
+
         response = Bot.respostaDireta(messagetext);
         if(Bot.msgContains(messagetext, 'COMO')) {
             return Bot.intencaoDuvida(datares, chat_id, messagetext);
@@ -1109,14 +1122,15 @@ module.exports = class Bot {
             || Bot.msgContains(messagetext, 'O QUE')) {
             return Bot.intencaoConsultaIdentidade(datares, chat_id, messagetext);
         }
-        if(Bot.msgContains(messagetext, 'LOJA')
-            && Bot.msgStartWith(messagetext, 'LOJA')) {
-            return Bot.intencaoSetarLoja(datares, chat_id, messagetext);
-        }
         if(Bot.msgContains(messagetext, 'TROCAR DE LOJA')
             && Bot.msgStartWith(messagetext, 'TROCAR DE LOJA')) {
             return Bot.intencaoTrocarLoja(datares, chat_id, messagetext);
         }
+        if(Bot.msgContains(messagetext, 'LOJA')
+            && Bot.msgStartWith(messagetext, 'LOJA')) {
+            return Bot.intencaoSetarLoja(datares, chat_id, messagetext);
+        }
+        response = Bot.conversaFiada(messagetext);
 
         if(response === '') return Bot.sendDuvidaNaoSei(chat_id, datares, messagetext);
         return Bot.sendMessage(
