@@ -47,9 +47,9 @@ module.exports = class Bot {
                 } else {
                     console.log('NAO RETORNOU TOKEN, RETORNOU:')
                     if(res.message == 'MORE_THAN_ONE_ENVIRONMENT_ACCESS') {
-                        let message = 'Você deseja ver de qual loja? digite:';
+                        let message = 'Você deseja trocar para qual loja? digite:';
                         for(let loja of res.environments) {
-                            message += `\nloja ${loja.id} (para ver da ${loja.name})`;
+                            message += `\nloja ${loja.name} (para trocar para a ${loja.name})`;
                         }
                         Bot.sendMessage(chat_id,
                         message)
