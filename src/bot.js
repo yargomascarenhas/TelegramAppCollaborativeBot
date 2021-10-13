@@ -45,7 +45,6 @@ module.exports = class Bot {
                         reject(errd);
                     });
                 } else {
-                    console.log('NAO RETORNOU TOKEN, RETORNOU:')
                     if(res.message == 'MORE_THAN_ONE_ENVIRONMENT_ACCESS') {
                         let message = 'Você deseja trocar para qual loja? digite:';
                         for(let loja of res.environments) {
@@ -130,21 +129,21 @@ module.exports = class Bot {
     static sendRegisterMessage(data) {
         return Bot.sendMessage(
             data.telegram_id,
-            `Tudo certo ${data.data.first_name}. Agora você está inscrito para as notificações da loja ${data.environment.name}!`
+            `Tudo certo ${data.data.first_name}. Agora você está inscrita(o) para receber as notificações da loja ${data.environment.name}!`
         );
     }
 
     static sendInvalidKeyMessage(chat_id) {
         return Bot.sendMessage(
             chat_id,
-            `Hmmm... esse código que você informou é inválido`
+            `Hummm... esse código que você informou é inválido`
         );
     }
 
     static sendServerFailMessage(req) {
         return Bot.sendMessage(
             req.body.message.chat.id,
-            'Olha, eu estou um pouco atarefada por agora, fala comigo daqui a 1 minuto que te ajudo.'
+            'Olha, eu estou um pouco atarefada agora, fala comigo daqui a 1 minuto que te ajudo.'
         );
     }
 
@@ -158,7 +157,7 @@ module.exports = class Bot {
             } else {
                 Bot.sendMessage(
                     req.body.message.chat.id,
-                    'Olá, eu ainda não te conheço, por favor digite a sua chave do AppCollaborative.'
+                    'Olá, eu ainda não te conheço. Por favor, digite a sua chave do AppCollaborative.'
                 ).then(function() {res.status(200).send({})})
                 .catch(function() {res.status(200).send({})});
             }
@@ -235,7 +234,7 @@ module.exports = class Bot {
             || Bot.msgContains(messagetext, 'VAI?')
             || Bot.msgContains(messagetext, 'ESTA?')
             || Bot.msgContains(messagetext, 'CONTIGO?'))) {
-            response = `Estou bem, obrigada por perguntar, como posso ajudar?`;
+            response = `Estou bem, obrigada por perguntar. Como posso ajudar?`;
         }
         if((Bot.msgContains(messagetext, 'TUDO')
             && Bot.msgContains(messagetext, 'TD'))
@@ -262,7 +261,7 @@ module.exports = class Bot {
                     Bot.msgContains(messagetext, 'EFETUAR') ||
                     Bot.msgContains(messagetext, 'FAÇO') ||
                     Bot.msgContains(messagetext, 'FAZ')) {
-                    response = 'O parceiro faz o Check\\-in através do acesso dele na plataforma, e quando o check\\-in é finalizado ele fica disponível para você conferir os itens, aceitar ou negar\\. [Saiba mais](https://youtu.be/20Ff4DdA05U)';
+                    response = 'A marca faz o Check\\-in através do acesso dela na plataforma, e quando o check\\-in é finalizado, fica disponível para você conferir os itens, aceitar ou negar\\. [Saiba mais](https://youtu.be/20Ff4DdA05U)';
                 }
                 if(Bot.msgContains(messagetext, 'ACEITAR') ||
                     Bot.msgContains(messagetext, 'ACEIT') ||
@@ -272,7 +271,7 @@ module.exports = class Bot {
                     response = 'Você pode aceitar ou negar um Check\\-in, através do menu \\-\\> Parceiros \\-\\> Solicitações \\-\\> clique sobre o Check\\-in desejado\\. [Saiba mais](https://youtu.be/\\-mrOK7_Q8IQ)';
                 }
                 if(Bot.msgContains(messagetext, 'ETIQUETA')) {
-                    response = 'Você pode imprimir etiquetas em qualquer tipo de impressora utilizando o AppCollaborative, lembre\\-se sempre de utilizar o Google Chrome, para mais detalhes preparamos esse video que ensina como configurar e imprimir: [Etiquetas](https://youtu.be/uBjCMwXFRJI)';
+                    response = 'Você pode imprimir etiquetas em qualquer tipo de impressora utilizando o AppCollaborative, lembre\\-se sempre de utilizar o Google Chrome. Para mais detalhes preparamos esse video que ensina como configurar e imprimir: [Etiquetas](https://youtu.be/uBjCMwXFRJI)';
                 }
             }
             if(Bot.msgContains(messagetext, 'CHECKOUT') ||
@@ -281,7 +280,7 @@ module.exports = class Bot {
                     Bot.msgContains(messagetext, 'EFETUAR') ||
                     Bot.msgContains(messagetext, 'FAÇO') ||
                     Bot.msgContains(messagetext, 'FAZ')) {
-                    response = 'O parceiro faz o Check\\-out através do acesso dele na plataforma, e quando o check\\-out é finalizado ele fica disponível para você conferir os itens, aceitar ou negar\\. [Saiba mais](https://youtu.be/3_9_ceZ5nWU)';
+                    response = 'A marca faz o Check\\-out através do acesso dela na plataforma, e quando o check\\-out é finalizado fica disponível para você aceitar ou negar\\. [Saiba mais](https://youtu.be/3_9_ceZ5nWU)';
                 }
                 if(Bot.msgContains(messagetext, 'ACEITAR') ||
                     Bot.msgContains(messagetext, 'ACEITA') ||
@@ -301,20 +300,20 @@ module.exports = class Bot {
                     Bot.msgContains(messagetext, 'EDIT') ||
                     Bot.msgContains(messagetext, 'MUD')
                 ) {
-                    response = 'Você como lojista pode cadastrar um novo produto, editar e deletar direto no menu \\-\\> Produtos \\-\\> Produtos, a Marca somente consegue inserir e editar produtos através de solicitações';
+                    response = 'Você, como lojista, pode cadastrar um novo produto, editar ou deletar direto no menu \\-\\> Produtos \\-\\> Produtos, a Marca consegue inserir e editar produtos através de solicitações';
                 }
                 if(Bot.msgContains(messagetext, 'DESCONTO')) {
-                    response = 'Você pode cadastrar um desconto direto no produto e assim toda vez que ele for adicionado na venda ele já entrará com o valor do desconto, esse desconto também será exibido no e\\-commerce\\.';
+                    response = 'Você pode cadastrar um desconto direto no produto e assim toda vez que ele for adicionado na venda já entrará com o valor do desconto, esse desconto também será exibido no e\\-commerce\\.';
                 }
                 if(Bot.msgContains(messagetext, 'CUSTO')) {
-                    response = 'Tanto você quanto a marca podem cadastrar o preço de custo no produto, e depois apurar os produtos vendidos pelo preço de custo no relatório de vendas,  marcando a opção de visualização com preço de custo\\.';
+                    response = 'Tanto você quanto a marca podem cadastrar o preço de custo no produto, e depois apurar os produtos vendidos pelo preço de custo no relatório de vendas, marcando a opção de visualização com preço de custo\\.';
                 }
                 if(Bot.msgContains(messagetext, 'MARKUP') ||
                     Bot.msgContains(messagetext, 'COMISSAO')) {
-                    response = 'Por padrão o sistema considera o calculo de comissão com base na porcentagem informada no campo de markup no cadastro do Parceiro, você pode informar o markup em porcentagem de um produto específico, dessa forma o calculo será prioritariamente com base no cadastro do produto\\.';
+                    response = 'Por padrão o sistema considera o cálculo de comissão com base na porcentagem informada no campo de markup no cadastro do Parceiro, você pode informar o markup em porcentagem de um produto específico, dessa forma o calculo será prioritariamente com base no cadastro do produto\\.';
                 }
                 if(Bot.msgContains(messagetext, 'FOTO')) {
-                    response = 'Você pode cadastrar uma foto por produto, dependendo se a loja utiliza o nosso módulo de E\\-commerce e dependendo do tema é possível adicionar até três fotos por produto\\.';
+                    response = 'Você pode cadastrar uma foto por produto, dependendo do tema utilizado é possível adicionar até três fotos por produto\\.';
                 }
             }
             if(Bot.msgContains(messagetext, 'VENDA')) {
@@ -400,7 +399,7 @@ module.exports = class Bot {
                     Bot.msgContains(messagetext, 'EFETUAR') ||
                     Bot.msgContains(messagetext, 'FAÇO') ||
                     Bot.msgContains(messagetext, 'FAZ')) {
-                    response = 'Você pode fazer o Check\\-in através do seu acesso na plataforma, e quando o check\\-in é finalizado ele fica disponível para o lojista você conferir os itens, aceitar ou negar\\. [Saiba mais](https://youtu.be/20Ff4DdA05U)';
+                    response = 'Você pode fazer o Check\\-in através do seu acesso na plataforma, e quando o check\\-in é finalizado fica disponível para o lojista conferir os itens, aceitar ou negar\\. [Saiba mais](https://youtu.be/20Ff4DdA05U)';
                 }
                 if(Bot.msgContains(messagetext, 'ACEITAR') ||
                     Bot.msgContains(messagetext, 'ACEIT') ||
@@ -410,7 +409,7 @@ module.exports = class Bot {
                     response = 'O lojista pode aceitar ou negar um Check\\-in, através do menu \\-\\> Parceiros \\-\\> Solicitações \\-\\> clique sobre o Check\\-in desejado\\. [Saiba mais](https://youtu.be/\\-mrOK7_Q8IQ)';
                 }
                 if(Bot.msgContains(messagetext, 'ETIQUETA')) {
-                    response = 'Você pode imprimir etiquetas em qualquer tipo de impressora utilizando o AppCollaborative, lembre\\-se sempre de utilizar o Google Chrome, para mais detalhes preparamos esse video que ensina como configurar e imprimir: [Etiquetas](https://youtu.be/uBjCMwXFRJI)';
+                    response = 'Você pode imprimir etiquetas em qualquer tipo de impressora utilizando o AppCollaborative, lembre\\-se sempre de utilizar o Google Chrome. Para mais detalhes preparamos esse video que ensina como configurar e imprimir: [Etiquetas](https://youtu.be/uBjCMwXFRJI)';
                 }
             }
             if(Bot.msgContains(messagetext, 'CHECKOUT') ||
@@ -419,7 +418,7 @@ module.exports = class Bot {
                     Bot.msgContains(messagetext, 'EFETUAR') ||
                     Bot.msgContains(messagetext, 'FAÇO') ||
                     Bot.msgContains(messagetext, 'FAZ')) {
-                    response = 'Você pode fazer o Check\\-out através do seu acesso dele na plataforma, e quando o check\\-out é finalizado ele fica disponível para você conferir os itens, aceitar ou negar\\. [Saiba mais](https://youtu.be/3_9_ceZ5nWU)';
+                    response = 'Você pode fazer o Check\\-out através do seu acesso na plataforma, e quando o check\\-out é finalizado, fica disponível para a loja aceitar ou negar\\. [Saiba mais](https://youtu.be/3_9_ceZ5nWU)';
                 }
                 if(Bot.msgContains(messagetext, 'ACEITAR') ||
                     Bot.msgContains(messagetext, 'ACEITA') ||
@@ -439,20 +438,20 @@ module.exports = class Bot {
                     Bot.msgContains(messagetext, 'EDIT') ||
                     Bot.msgContains(messagetext, 'MUD')
                 ) {
-                    response = 'Você somente consegue inserir e editar produtos através de solicitações de Check\\-in ou Check\\-out';
+                    response = 'Você consegue inserir e editar produtos através de solicitações';
                 }
                 if(Bot.msgContains(messagetext, 'DESCONTO')) {
-                    response = 'Você pode cadastrar um desconto direto no produto pelo Check\\-in ou editando solicitando alteração no estoque e assim toda vez que ele for adicionado na venda ele já entrará com o valor do desconto, esse desconto também será exibido no e\\-commerce\\.';
+                    response = 'Você pode cadastrar um desconto direto no produto pelo Check\\-in ou solicitando alteração no estoque, e assim, toda vez que o produto for adicionado na venda já entrará com o valor do desconto, esse desconto também será exibido no e\\-commerce\\.';
                 }
                 if(Bot.msgContains(messagetext, 'CUSTO')) {
-                    response = 'você pode cadastrar o preço de custo no produto, e depois apurar os produtos vendidos pelo preço de custo no relatório de vendas,  marcando a opção de visualização com preço de custo\\.';
+                    response = 'você pode cadastrar o preço de custo no produto, e depois apurar os produtos vendidos pelo preço de custo no relatório de vendas. Para isso, marque a opção de visualização com preço de custo\\.';
                 }
                 if(Bot.msgContains(messagetext, 'MARKUP') ||
                     Bot.msgContains(messagetext, 'COMISSAO')) {
-                    response = 'Por padrão o sistema considera o calculo de comissão com base na porcentagem informada no campo de markup no cadastro do Parceiro, você pode informar o markup em porcentagem de um produto específico, dessa forma o calculo será prioritariamente com base no cadastro do produto\\.';
+                    response = 'Por padrão, o sistema considera o cálculo de comissão com base na porcentagem informada no campo de markup no cadastro do parceiro.';
                 }
                 if(Bot.msgContains(messagetext, 'FOTO')) {
-                    response = 'Você pode cadastrar uma foto por produto, dependendo se a loja utiliza o nosso módulo de E\\-commerce e dependendo do tema é possível adicionar até três fotos por produto\\.';
+                    response = 'Você pode cadastrar uma foto por produto, dependendo do tema utilizado é possível adicionar até três fotos por produto\\.';
                 }
             }
             if(Bot.msgContains(messagetext, 'VENDA')) {
@@ -479,11 +478,10 @@ module.exports = class Bot {
 
     static sendDuvidaNaoSei(chat_id, datares, messagetext) {
         let responsearr = [
-            'Olha, eu não entendi, você poderia reformular sua duvida?',
-            'eu ainda estou aprendendo, então no momento eu não sei responder sua duvida',
-            'eu não sei, mas em breve vou aprender mais e estarei pronta pra responder sobre o assunto',
-            'se eu te falar que eu não sei ainda, mas vou procurar saber para aprender mais',
-            'eu não entendi, ainda to aprendendo sobre o assunto',
+            'Olha, eu não entendi, você poderia reformular sua dúvida?',
+            'eu ainda estou aprendendo, então no momento eu não sei responder sua dúvida',
+            'eu não sei, mas em breve vou aprender mais e estarei pronta para te responder',
+            'eu não entendi, ainda estou aprendendo sobre o assunto',
             'hmmm...  eu não sei te responder sobre isso, mas vou procurar saber.'
         ];
         let randomIndex = Math.floor(Math.random() * (responsearr.length - 1));
@@ -563,7 +561,7 @@ module.exports = class Bot {
                     }
                     Bot.sendMessage(
                         chat_id,
-                        `Foram feitas um total de ${result._links.count} vendas, que totalizam ${amount.toFixed(2)} reais. Sendo um total de ${open.toFixed(2)} reais em aberto, e ${closed.toFixed(2)} reais de vendas pagas.`
+                        `Foram feitas um total de ${result._links.count} vendas, que totalizam R$${amount.toFixed(2)}. Sendo um total de R$${open.toFixed(2)} em aberto, e R$${closed.toFixed(2)} de vendas pagas.`
                     ).then(res => resolve(res))
                     .catch(err => resolve(err));
                 }
@@ -639,7 +637,7 @@ module.exports = class Bot {
                     }
                     let message = (maisvendeu.id)
                         ? `Foi no dia ${maisvendeu.contability_at.substr(0, 10)}, um total de R$${maisvendeu.amount}.`
-                        : 'Nesse mês não foram realizadas vendas ainda.';
+                        : 'Nesse mês não foram realizadas vendas.';
 
                     Bot.sendMessage(
                         chat_id,
@@ -679,7 +677,7 @@ module.exports = class Bot {
                         message += `A marca que mais vendeu foi a ${maisvendeu.brand.name} somando R$${maisvendeu.amount}`;
                     }
                     if(menosvendeu.id) {
-                        message += `, e a marcar que menos vendeu foi a ${menosvendeu.brand.name}, um total de R$${menosvendeu.amount}`;
+                        message += `, e a marca que menos vendeu foi a ${menosvendeu.brand.name}, um total de R$${menosvendeu.amount}`;
                     }
                     if(message != '') {
                         message += ', isso sem incluir as marcas que não venderam nada.';
@@ -1067,7 +1065,7 @@ module.exports = class Bot {
             })
             .catch(err => {
                 console.log('ERR', err);
-                Bot.sendMessage(chat_id, 'Não consegui selecionar a loja, verifica se você digitou o numero correto.')
+                Bot.sendMessage(chat_id, 'Não consegui selecionar a loja, verifica se você digitou o nome correto.')
                 .then(res => resolve(res))
                 .catch(err => resolve(err));
             })
@@ -1084,7 +1082,7 @@ module.exports = class Bot {
             })
             .catch(err => {
                 console.log('ERR', err);
-                Bot.sendMessage(chat_id, 'Não consegui selecionar a loja, verifica se você digitou o numero correto.')
+                Bot.sendMessage(chat_id, 'Não consegui selecionar a loja, verifica se você digitou o nome correto.')
                 .then(res => resolve(res))
                 .catch(err => resolve(err));
             })
