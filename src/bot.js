@@ -68,7 +68,7 @@ module.exports = class Bot {
 
     static sendMessageMarkdown(chat_id, message) {
         return new Promise(function(resolve, reject) {
-            console.log('STARTING sendMessageMarkdown');
+            console.log('sendMessageMarkdown');
             Api.postByBody(
                 process.env.TELEGRAMBOT_URI,
                 '/sendMessage',
@@ -172,7 +172,7 @@ module.exports = class Bot {
 
     static setarLojaPreferencia(datares, chat_id, envid) {
         return new Promise((resolve, reject) => {
-            console.log('setarLojaPreferencia', datares, envid);
+            console.log('setarLojaPreferencia', envid);
             Collaborative.updateEnvironment(chat_id, {
                 environment_id: envid,
                 partneruser_id: datares.data.partneruser_id
@@ -670,7 +670,6 @@ module.exports = class Bot {
             console.log('processaConsultaMarcaMaisVendeu');
             Bot.consulta(chat_id, query)
             .then(function(result) {
-                console.log(result);
                 let maisvendeu = {};
                 let menosvendeu = {}
                 if(result.data) {
@@ -1130,7 +1129,7 @@ module.exports = class Bot {
             && Bot.msgStartWith(messagetext, 'LOJA')) {
             return Bot.intencaoSetarLoja(datares, chat_id, messagetext);
         }
-        response = Bot.conversaFiada(messagetext);
+        if(response === '') response = Bot.conversaFiada(messagetext);
 
         if(response === '') return Bot.sendDuvidaNaoSei(chat_id, datares, messagetext);
         return Bot.sendMessage(
