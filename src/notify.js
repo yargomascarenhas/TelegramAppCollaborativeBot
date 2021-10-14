@@ -39,7 +39,7 @@ module.exports = class Notify {
         if(user.preferences) {
           preferences = user.preferences;
         } else {
-          if (user.type === 'DEFAULT') {
+          if (user.type === 'USER') {
               setpref = ['SOLICITACAOFINALIZADA', 'ECOMMERCEPEDIDO', 'VENDAPAGA', 'ECOMMERCENOVOCLIENTE', 'ANIVERSARIANTE'];
           }
           if (user.type === 'PARTNER') {
