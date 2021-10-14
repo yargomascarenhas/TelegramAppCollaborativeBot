@@ -4,9 +4,11 @@ const Bot = require('./bot');
 module.exports = class Notify {
     static send(req, res) {
         let text = Notify.textByNotification(req.body);
+        console.log('NOTIFY', text);
         Collaborative.query(Notify.queryRecipientsByNotification(req.body))
         .then(result => {
             if(result.data && result.data[0]) {
+                console.log('results', result.data);
                 let promises = [];
                 for(let recipient of result.data) {
                     if(Notify.userMayReceiveThisMessage(recipient.user, req.body)) {
@@ -53,16 +55,21 @@ module.exports = class Notify {
     }
 
     static queryRecipientsByNotification(notification) {
-        let query = '?';
+        let prefix = '';
+        let query = '';
         if (notification.to_type) {
-            query += `type=${notification.to_type}`;
+            prefix = (prefix == '') ? '?' : '&';
+            query += `${prefix}type=${notification.to_type}`;
         }
         if (notification.to_environment) {
-            query += `environment=${notification.to_environment}`;
+            prefix = (prefix == '') ? '?' : '&';
+            query += `${prefix}environment=${notification.to_environment}`;
         }
         if (notification.to_user) {
-            query += `user_id=${notification.to_user}`;
+            prefix = (prefix == '') ? '?' : '&';
+            query += `${prefix}user_id=${notification.to_user}`;
         }
+        console.log('QUERYING', query);
         return query;
     }
 
