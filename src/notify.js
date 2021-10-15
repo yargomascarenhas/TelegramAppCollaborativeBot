@@ -3,25 +3,35 @@ const Bot = require('./bot');
 
 module.exports = class Notify {
     static send(req, res) {
-        let text = Notify.textByNotification(req.body);
-        console.log('NOTIFY', text);
-        Collaborative.query(Notify.queryRecipientsByNotification(req.body))
-        .then(result => {
-            if(result.data && result.data[0]) {
-                console.log('results', result.data);
-                let promises = [];
-                for(let recipient of result.data) {
-                    if(Notify.userMayReceiveThisMessage(recipient.user, req.body)) {
-                        promises.push(Bot.sendMessageMarkdown(
-                            recipient.telegram_id,
-                            text
-                        ));
+        return new Promise((resolve, reject) => {
+            let text = Notify.textByNotification(req.body);
+            console.log('NOTIFY', text);
+            Collaborative.query(Notify.queryRecipientsByNotification(req.body))
+            .then(result => {
+                if(result.data && result.data[0]) {
+                    console.log('results', result.data);
+                    let promises = [];
+                    for(let recipient of result.data) {
+                        if(Notify.userMayReceiveThisMessage(recipient.user, req.body)) {
+                            promises.push(Bot.sendMessageMarkdown(
+                                recipient.telegram_id,
+                                text
+                            ));
+                        } else {
+                            promises.push(new Promise((res) => res(true)));
+                        }
                     }
+                    Promise.all(promises)
+                    .then(s => {
+                        res.status(200).send({});
+                        resolve(true);
+                    })
+                    .catch(e => {
+                        console.log(e);
+                        resolve(true);
+                    });
                 }
-                Promise.all(promises)
-                .then(s => res.status(200).send({}))
-                .catch(e => console.log(e));
-            }
+            });
         });
     }
 
