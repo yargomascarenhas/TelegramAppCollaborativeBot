@@ -259,6 +259,19 @@ module.exports = class Bot {
             Bot.msgContains(messagetext, 'ESPERO QUE SIM')) {
             response = `Que legal! me fala sua dúvida`;
         }
+        if(Bot.msgContains(messagetext, 'QUE MARAVILHA') ||
+            Bot.msgContains(messagetext, 'QUE ÓTIMO') ||
+            Bot.msgContains(messagetext, 'QUE OTIMO') ||
+            Bot.msgContains(messagetext, 'QUE BACANA') ||
+            Bot.msgContains(messagetext, 'GENIAL') ||
+            Bot.msgContains(messagetext, 'MARAVILH') ||
+            Bot.msgContains(messagetext, 'QUE BOM')) {
+            response = `Obrigada! fico muito feliz que você tenha gostado`;
+        }
+        if(Bot.msgContains(messagetext, 'CERTO')
+            && Bot.msgStartWith(messagetext, 'CERTO')) {
+            response = `certinho`;
+        }
         return response;
     }
 
@@ -613,6 +626,28 @@ module.exports = class Bot {
         });
     }
 
+    static processaConsultaQuantidadeMarcas(datares, chat_id, messagetext, query) {
+        return new Promise(function(resolve, reject) {
+            console.log('processaConsultaQuantidadeMarcas');
+            Bot.consulta(chat_id, query)
+            .then(function(result) {
+                console.log(result);
+                if(result.data) {
+                    console.log(`QUANTIDADE DO LINKS COUNT: ${result._links.count}, QUANTIDADE DO ARRAY: ${result.data.length}`);
+                    Bot.sendMessage(
+                        chat_id,
+                        `Você possui um total de ${result._links.count} marcas parceiras.`
+                    ).then(res => resolve(res))
+                    .catch(err => resolve(err));
+                }
+            })
+            .catch(function(err) {
+                console.log(err);
+                reject(err);
+            })
+        });
+    }
+
     static processaConsultaQuantidadeTroca(datares, chat_id, messagetext, query) {
         return new Promise(function(resolve, reject) {
             console.log('processaConsultaQuantidadeTroca');
@@ -735,7 +770,7 @@ module.exports = class Bot {
                         message += `O produto que mais vendeu foi (${maisvendeu.product.id}) ${maisvendeu.product.description} somando R$${maisvendeu.amount}`;
                     }
                     if(menosvendeu.id) {
-                        message += `, e o produto que menos vendeu foi (${menosvendeu.product.id}) ${menosvendeu.product.description} somando R$${menosvendeu.amount}}`;
+                        message += `, e o produto que menos vendeu foi (${menosvendeu.product.id}) ${menosvendeu.product.description} somando R$${menosvendeu.amount}`;
                     }
                     if(message != '') {
                         message += ', isso sem incluir os produtos que não venderam nada.';
@@ -981,6 +1016,10 @@ module.exports = class Bot {
                     'sales/exchanges',
                     Bot.processaConsultaQuantidadeTroca
                 );
+            }
+            if(Bot.msgContains(messagetext, 'MARCA')
+                || Bot.msgContains(messagetext, 'PARCEIR')) {
+                return Bot.processaConsultaQuantidadeMarcas(datares, chat_id, messagetext, 'partners?per_page=999');
             }
             return Bot.sendSugestao(chat_id, datares, messagetext,
                 'Não entendi a pergunta, você pode me perguntar por exemplo: Quantas vendas foram feitas este mês, ou quantas trocas foram feitas em dezembro de 2020'
