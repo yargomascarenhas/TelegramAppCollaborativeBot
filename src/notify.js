@@ -8,8 +8,8 @@ module.exports = class Notify {
             console.log('NOTIFY', text);
             Collaborative.query(Notify.queryRecipientsByNotification(req.body))
             .then(result => {
+                console.log('recipients', result.data);
                 if(result.data && result.data[0]) {
-                    console.log('results', result.data);
                     let promises = [];
                     for(let recipient of result.data) {
                         if(Notify.userMayReceiveThisMessage(recipient.user, req.body)) {
@@ -23,15 +23,24 @@ module.exports = class Notify {
                     }
                     Promise.all(promises)
                     .then(s => {
-                        res.status(200).send({});
                         resolve(true);
+                        res.status(200).send({});
                     })
                     .catch(e => {
                         console.log(e);
                         resolve(true);
+                        res.status(200).send({});
                     });
+                } else {
+                    resolve(true);
+                    res.status(200).send({});
                 }
-            });
+            })
+            .catch(err => {
+                console.log('ERR', err);
+                resolve(true);
+                res.status(200).send({});
+            })
         });
     }
 
