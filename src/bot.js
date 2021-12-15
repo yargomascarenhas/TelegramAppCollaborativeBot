@@ -272,6 +272,25 @@ module.exports = class Bot {
             && Bot.msgStartWith(messagetext, 'CERTO')) {
             response = `certinho`;
         }
+        if(Bot.msgContains(messagetext, 'SITE')) {
+            response = `O site do AppCollaborative é: www.appcollaborative.com`;
+        }
+        if(Bot.msgContains(messagetext, 'NOTIFICA')) {
+            response = `Eu vou te notificar dependendo dos tipos de notificação que você escolheu ao me ativar no seu Telegram. Você pode editar as suas preferências direto no AppCollaborative, no icone do sino, clicando na engrenagem.`;
+        }
+        if(Bot.msgContains(messagetext, 'VENDA')) {
+            response = `Se você quiser saber sobre suas vendas no mês, você pode me perguntar por exemplo: Quantas vendas fiz este mês`;
+        }
+        if(Bot.msgContains(messagetext, 'CONTATO') ||
+        Bot.msgContains(messagetext, 'ATENDE') ||
+        Bot.msgContains(messagetext, 'FALO') ||
+        Bot.msgContains(messagetext, 'FALAR')) {
+            response = `Você pode sempre que precisar falar com a gente através do e-mail: contato@appcollaborative.com ou através do nosso Whatsapp (71) 992869736`;
+        }
+        if(Bot.msgContains(messagetext, 'CANAL') ||
+        Bot.msgContains(messagetext, 'VIDEO')) {
+            response = `O canal do AppCollaborative no youtube é: www.youtube.com/c/AppCollaborative`;
+        }
         return response;
     }
 
