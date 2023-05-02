@@ -70,6 +70,9 @@ module.exports = class Notify {
             preferences[rule] = true;
           }
         }
+
+        console.log('USER MAY RECEIVE:', (preferences[notification.rule] ? true : false));
+
         return preferences[notification.rule];
     }
 

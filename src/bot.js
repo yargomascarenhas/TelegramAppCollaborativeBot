@@ -766,6 +766,35 @@ module.exports = class Bot {
         });
     }
 
+    static processaConsultaParceiroUsuario(datares, chat_id, messagetext, attrib) {
+        return new Promise(function(resolve, reject) {
+            console.log('processaConsultaParceiroUsuario');
+            let query = 'partners/me';
+            Bot.consulta(chat_id, query)
+            .then(function(result) {
+                if(result.data) {
+                    let message = '';
+                    if(attrib == 'email') {
+                        message = `O seu e-mail é ${result.data.email}`;
+                        Bot.sendMessage(
+                            chat_id,
+                            message
+                        ).then(res => resolve(res))
+                        .catch(err => resolve(err));
+                    }
+                } else {
+                    Bot.sendDuvidaNaoSei(chat_id, datares, messagetext)
+                    .then(res => resolve(res))
+                    .catch(err => resolve(err));
+                }
+            }
+            .catch(function(err) {
+                console.log(err);
+                reject(err);
+            })
+        });
+    }
+
     static processaConsultaProdutoMaisVendeu(datares, chat_id, messagetext, query) {
         return new Promise(function(resolve, reject) {
             console.log('processaConsultaProdutoMaisVendeu');
@@ -861,6 +890,10 @@ module.exports = class Bot {
             }
         }
         return false;
+    }
+
+    static consultaParceiroUsuario(datares, chat_id, messagetext, attrib, tocall) {
+        return tocall(datares, chat_id, messagetext, attrib);
     }
 
     static consultaPeriodo(datares, chat_id, messagetext, query, tocall) {
@@ -1106,8 +1139,19 @@ module.exports = class Bot {
             }
         }
         if(Bot.isPartner(datares)) {
-            if(Bot.msgContains(messagetext, 'VEND')) {
-
+            if(Bot.msgContains(messagetext, 'QUAL')) {
+                if(Bot.msgContains(messagetext, 'MEU')) {
+                    if(Bot.msgContains(messagetext, 'EMAIL') ||
+                        Bot.msgContains(messagetext, 'E-MAIL')) {
+                            Bot.consultaParceiroUsuario(
+                                datares,
+                                chat_id,
+                                messagetext,
+                                'email',
+                                Bot.processaConsultaParceiroUsuario
+                            )
+                    }
+                }
             }
         }
 
