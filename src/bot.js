@@ -787,8 +787,7 @@ module.exports = class Bot {
                     .then(res => resolve(res))
                     .catch(err => resolve(err));
                 }
-            }
-            .catch(function(err) {
+            }).catch(function(err) {
                 console.log(err);
                 reject(err);
             })
