@@ -129,7 +129,7 @@ module.exports = class Bot {
     static sendRegisterMessage(data) {
         return Bot.sendMessage(
             data.telegram_id,
-            `Tudo certo ${data.data.first_name}. Agora você está inscrita(o) para receber as notificações da loja ${data.environment.name}!`
+            `Tudo certo ${data.data.first_name}. Agora você está inscrita(o) para receber as notificações!`
         );
     }
 
@@ -177,6 +177,21 @@ module.exports = class Bot {
                 environment_id: envid,
                 partneruser_id: datares.data.partneruser_id
             })
+            .then(function(datares) {
+                if(datares.id) {
+                    resolve(datares);
+                } else {
+                    reject(datares);
+                }
+            })
+            .catch(err => reject(err));
+        });
+    }
+
+    static desassociar(datares, chat_id, envid) {
+        return new Promise((resolve, reject) => {
+            console.log('desassociar', envid);
+            Collaborative.removeTelegram(chat_id, {})
             .then(function(datares) {
                 if(datares.id) {
                     resolve(datares);
@@ -1184,6 +1199,23 @@ module.exports = class Bot {
         });
     }
 
+    static intencaoDesassociar(datares, chat_id, messagetext) {
+        return new Promise((resolve,reject) => {
+            Bot.desassociar(datares, chat_id, null)
+            .then(res => {
+                Bot.sendMessage(chat_id, 'Chave telegram do AppCollaborative foi desassociada com sucesso!')
+                .then(res => resolve(res))
+                .catch(err => resolve(err));
+            })
+            .catch(err => {
+                console.log('ERR', err);
+                Bot.sendMessage(chat_id, 'Não consegui desassociar sua chave do telegram.')
+                .then(res => resolve(res))
+                .catch(err => resolve(err));
+            })
+        });
+    }
+
     static intencaoTrocarLoja(datares, chat_id, messagetext) {
         return new Promise((resolve,reject) => {
             Bot.setarLojaPreferencia(datares, chat_id, null)
@@ -1221,6 +1253,11 @@ module.exports = class Bot {
         if(Bot.msgContains(messagetext, 'QUAL')
             || Bot.msgContains(messagetext, 'O QUE')) {
             return Bot.intencaoConsultaIdentidade(datares, chat_id, messagetext);
+        }
+        if(Bot.msgContains(messagetext, 'DESASSOCIAR')
+            || Bot.msgContains(messagetext, 'ME ESQUECE')
+            || Bot.msgContains(messagetext, 'REMOVER MINHA CHAVE')) {
+            return Bot.intencaoDesassociar(datares, chat_id, messagetext);
         }
         if(Bot.msgContains(messagetext, 'TROCAR DE LOJA')
             && Bot.msgStartWith(messagetext, 'TROCAR DE LOJA')) {
